@@ -1,0 +1,27 @@
+{
+    "fixItApp": {
+        "work" : {
+            "home": {
+                "title": "Works",
+                "createLabel": "Create a new Work",
+                "createOrEditLabel": "Create or edit a Work"
+            },
+            "created": "A new Work is created with identifier {{ param }}",
+            "updated": "A Work is updated with identifier {{ param }}",
+            "deleted": "A Work is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Work {{ id }}?"
+            },
+            "detail": {
+                "title": "Work"
+            },
+            "time": "Time",
+            "description": "Description",
+            "asap": "Asap",
+            "worker": "Worker",
+            "customer": "Customer",
+            "address": "Address",
+            "worktype": "Worktype"
+        }
+    }
+}

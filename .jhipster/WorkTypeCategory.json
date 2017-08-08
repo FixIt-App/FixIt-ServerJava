@@ -1,0 +1,33 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "relationshipName": "workTypes",
+            "otherEntityName": "workType",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "categories"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "order",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "changelogDate": "20170808005823",
+    "entityTableName": "work_type_category",
+    "dto": "no",
+    "pagination": "infinite-scroll",
+    "service": "no"
+}

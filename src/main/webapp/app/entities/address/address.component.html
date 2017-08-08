@@ -1,0 +1,78 @@
+<div>
+    <h2>
+        <span jhiTranslate="fixItApp.address.home.title">Addresses</span>
+        <button class="btn btn-primary float-right jh-create-entity create-address" [routerLink]="['/', { outlets: { popup: ['address-new'] } }]">
+            <span class="fa fa-plus"></span>
+            <span  jhiTranslate="fixItApp.address.home.createLabel">
+            Create new Address
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <div class="row">
+    </div>
+    <br/>
+    <div class="table-responsive" *ngIf="addresses">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="reset.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="name"><span jhiTranslate="fixItApp.address.name">Name</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="address"><span jhiTranslate="fixItApp.address.address">Address</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="city"><span jhiTranslate="fixItApp.address.city">City</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="country"><span jhiTranslate="fixItApp.address.country">Country</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="latitude"><span jhiTranslate="fixItApp.address.latitude">Latitude</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="longitude"><span jhiTranslate="fixItApp.address.longitude">Longitude</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="customer.id"><span jhiTranslate="fixItApp.address.customer">Customer</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="works.id"><span jhiTranslate="fixItApp.address.works">Works</span> <span class="fa fa-sort"></span></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']" [infiniteScrollDistance]="0">
+            <tr *ngFor="let address of addresses ;trackBy: trackId">
+                <td><a [routerLink]="['../address', address.id ]">{{address.id}}</a></td>
+                <td>{{address.name}}</td>
+                <td>{{address.address}}</td>
+                <td>{{address.city}}</td>
+                <td>{{address.country}}</td>
+                <td>{{address.latitude}}</td>
+                <td>{{address.longitude}}</td>
+                <td>
+                    <div *ngIf="address.customer">
+                        <a [routerLink]="['../customer', address.customer?.id ]" >{{address.customer?.id}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="address.works">
+                        <a [routerLink]="['../work', address.works?.id ]" >{{address.works?.id}}</a>
+                    </div>
+                </td>
+                <td class="text-right">
+                    <div class="btn-group flex-btn-group-container">
+                        <button type="submit"
+                                [routerLink]="['../address', address.id ]"
+                                class="btn btn-info btn-sm">
+                            <span class="fa fa-eye"></span>
+                            <span class="hidden-md-down" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', { outlets: { popup: 'address/'+ address.id + '/edit'} }]"
+                                replaceUrl="true"
+                                class="btn btn-primary btn-sm">
+                            <span class="fa fa-pencil"></span>
+                            <span class="hidden-md-down" jhiTranslate="entity.action.edit">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', { outlets: { popup: 'address/'+ address.id + '/delete'} }]"
+                                replaceUrl="true"
+                                class="btn btn-danger btn-sm">
+                            <span class="fa fa-remove"></span>
+                            <span class="hidden-md-down" jhiTranslate="entity.action.delete">Delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

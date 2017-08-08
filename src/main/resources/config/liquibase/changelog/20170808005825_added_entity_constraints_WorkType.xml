@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <!--
+        Added the constraints for entity WorkType.
+    -->
+    <changeSet id="20170808005825-2" author="jhipster">
+        
+        <addForeignKeyConstraint baseColumnNames="works_id"
+                                 baseTableName="work_type"
+                                 constraintName="fk_work_type_works_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="work"/>
+
+        <addForeignKeyConstraint baseColumnNames="work_types_id"
+                                 baseTableName="work_type_categories"
+                                 constraintName="fk_work_type_categories_work_types_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="work_type"/>
+        <addForeignKeyConstraint baseColumnNames="categories_id"
+                                 baseTableName="work_type_categories"
+                                 constraintName="fk_work_type_categories_categories_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="work_type_category"/>
+        
+        <addForeignKeyConstraint baseColumnNames="work_types_id"
+                                 baseTableName="work_type_workers"
+                                 constraintName="fk_work_type_workers_work_types_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="work_type"/>
+        <addForeignKeyConstraint baseColumnNames="workers_id"
+                                 baseTableName="work_type_workers"
+                                 constraintName="fk_work_type_workers_workers_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="worker"/>
+        
+    </changeSet>
+</databaseChangeLog>

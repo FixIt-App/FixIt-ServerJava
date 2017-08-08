@@ -1,0 +1,64 @@
+entity Worker {
+	documentId String required,
+    phone String required,
+    rh String required minlength(2)
+}
+
+entity Customer {
+    phone String required
+}
+
+entity Address {
+	name String required,
+    address String required,
+    city String required,
+    country String required,
+    latitude String required,
+    longitude String required
+}
+
+entity WorkTypeCategory {
+	name String required,
+    order Integer required
+}
+
+enum PriceType {
+	STANDARIZED, NOT_STANDARIZED, UNKNOWN
+}
+
+entity Work {
+    time ZonedDateTime required,
+    description String required,
+    asap Boolean required
+}
+
+entity WorkType {
+	name String required,
+    description String required,
+    icon String required,
+    priceType PriceType required,
+    price Long required,
+    order Integer required,
+    urlName String required
+}
+
+
+relationship ManyToMany {
+	WorkType{categories} to WorkTypeCategory{workTypes},
+    WorkType{workers} to Worker{workTypes}
+}
+
+relationship OneToOne {
+	Worker{user(login)} to User,
+    Customer{user(login)} to User
+}
+
+relationship ManyToOne {
+    Address{customer} to Customer{addresses},
+    Worker{works} to Work{worker},
+    Customer{works} to Work{customer},
+    Address{works} to Work{address},
+    WorkType{works} to Work{worktype}
+}
+
+paginate Worker, Customer, Address, WorkType, WorkTypeCategory, Work with infinite-scroll

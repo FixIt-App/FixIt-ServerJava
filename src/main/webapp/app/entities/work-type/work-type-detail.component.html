@@ -1,0 +1,67 @@
+
+<div *ngIf="workType">
+    <h2><span jhiTranslate="fixItApp.workType.detail.title">Work Type</span> {{workType.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="fixItApp.workType.name">Name</span></dt>
+        <dd>
+            <span>{{workType.name}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.description">Description</span></dt>
+        <dd>
+            <span>{{workType.description}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.icon">Icon</span></dt>
+        <dd>
+            <span>{{workType.icon}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.priceType">Price Type</span></dt>
+        <dd>
+            <span jhiTranslate="{{'fixItApp.PriceType.' + workType.priceType}}">{{workType.priceType}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.price">Price</span></dt>
+        <dd>
+            <span>{{workType.price}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.order">Order</span></dt>
+        <dd>
+            <span>{{workType.order}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.urlName">Url Name</span></dt>
+        <dd>
+            <span>{{workType.urlName}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.works">Works</span></dt>
+        <dd>
+            <div *ngIf="workType.works">
+                <a [routerLink]="['/work', workType.works?.id]">{{workType.works?.id}}</a>
+            </div>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.categories">Categories</span></dt>
+        <dd>
+            <span *ngFor="let categories of workType.categories; let last = last">
+                <a [routerLink]="['/work-type-category', categories?.id ]">{{categories.id}}</a>{{last ? '' : ', '}}
+            </span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.workType.workers">Workers</span></dt>
+        <dd>
+            <span *ngFor="let workers of workType.workers; let last = last">
+                <a [routerLink]="['/worker', workers?.id ]">{{workers.id}}</a>{{last ? '' : ', '}}
+            </span>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            (click)="previousState()"
+            class="btn btn-info">
+        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button"
+            [routerLink]="['/', { outlets: { popup: 'work-type/'+ workType.id + '/edit'} }]"
+            replaceUrl="true"
+            class="btn btn-primary">
+        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+    </button>
+</div>

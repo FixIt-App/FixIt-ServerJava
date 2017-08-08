@@ -1,0 +1,30 @@
+{
+    "fixItApp": {
+        "workType" : {
+            "home": {
+                "title": "Work Types",
+                "createLabel": "Crear nuevo Work Type",
+                "createOrEditLabel": "Crear o editar Work Type"
+            },
+            "created": "Un nuevo Work Type ha sido creado con el identificador {{ param }}",
+            "updated": "Un Work Type ha sido actualizado con el identificador {{ param }}",
+            "deleted": "Un Work Type ha sido eliminado con el identificador {{ param }}",
+            "delete": {
+                "question": "¿Seguro que quiere eliminar Work Type {{ id }}?"
+            },
+            "detail": {
+                "title": "Work Type"
+            },
+            "name": "Name",
+            "description": "Description",
+            "icon": "Icon",
+            "priceType": "Price Type",
+            "price": "Price",
+            "order": "Order",
+            "urlName": "Url Name",
+            "works": "Works",
+            "categories": "Categories",
+            "workers": "Workers"
+        }
+    }
+}

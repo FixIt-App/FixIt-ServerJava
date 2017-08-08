@@ -1,0 +1,10 @@
+{
+    "fixItApp": {
+        "PriceType" : {
+            "null": "",
+            "STANDARIZED": "STANDARIZED",
+            "NOT_STANDARIZED": "NOT_STANDARIZED",
+            "UNKNOWN": "UNKNOWN"
+        }
+    }
+}

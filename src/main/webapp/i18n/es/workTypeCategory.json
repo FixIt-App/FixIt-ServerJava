@@ -1,0 +1,23 @@
+{
+    "fixItApp": {
+        "workTypeCategory" : {
+            "home": {
+                "title": "Work Type Categories",
+                "createLabel": "Crear nuevo Work Type Category",
+                "createOrEditLabel": "Crear o editar Work Type Category"
+            },
+            "created": "Un nuevo Work Type Category ha sido creado con el identificador {{ param }}",
+            "updated": "Un Work Type Category ha sido actualizado con el identificador {{ param }}",
+            "deleted": "Un Work Type Category ha sido eliminado con el identificador {{ param }}",
+            "delete": {
+                "question": "¿Seguro que quiere eliminar Work Type Category {{ id }}?"
+            },
+            "detail": {
+                "title": "Work Type Category"
+            },
+            "name": "Name",
+            "order": "Order",
+            "workTypes": "Work Types"
+        }
+    }
+}

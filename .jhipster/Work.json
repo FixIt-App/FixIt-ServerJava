@@ -1,0 +1,57 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "worker",
+            "otherEntityName": "worker",
+            "otherEntityRelationshipName": "works"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "customer",
+            "otherEntityName": "customer",
+            "otherEntityRelationshipName": "works"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "address",
+            "otherEntityName": "address",
+            "otherEntityRelationshipName": "works"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "worktype",
+            "otherEntityName": "workType",
+            "otherEntityRelationshipName": "works"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "time",
+            "fieldType": "ZonedDateTime",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "description",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "asap",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "changelogDate": "20170808005824",
+    "entityTableName": "work",
+    "dto": "no",
+    "pagination": "infinite-scroll",
+    "service": "no"
+}

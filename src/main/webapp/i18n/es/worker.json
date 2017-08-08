@@ -1,0 +1,26 @@
+{
+    "fixItApp": {
+        "worker" : {
+            "home": {
+                "title": "Workers",
+                "createLabel": "Crear nuevo Worker",
+                "createOrEditLabel": "Crear o editar Worker"
+            },
+            "created": "Un nuevo Worker ha sido creado con el identificador {{ param }}",
+            "updated": "Un Worker ha sido actualizado con el identificador {{ param }}",
+            "deleted": "Un Worker ha sido eliminado con el identificador {{ param }}",
+            "delete": {
+                "question": "¿Seguro que quiere eliminar Worker {{ id }}?"
+            },
+            "detail": {
+                "title": "Worker"
+            },
+            "documentId": "Document Id",
+            "phone": "Phone",
+            "rh": "Rh",
+            "user": "User",
+            "works": "Works",
+            "workTypes": "Work Types"
+        }
+    }
+}

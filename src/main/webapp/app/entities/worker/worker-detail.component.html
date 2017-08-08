@@ -1,0 +1,43 @@
+
+<div *ngIf="worker">
+    <h2><span jhiTranslate="fixItApp.worker.detail.title">Worker</span> {{worker.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="fixItApp.worker.documentId">Document Id</span></dt>
+        <dd>
+            <span>{{worker.documentId}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.worker.phone">Phone</span></dt>
+        <dd>
+            <span>{{worker.phone}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.worker.rh">Rh</span></dt>
+        <dd>
+            <span>{{worker.rh}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.worker.user">User</span></dt>
+        <dd>
+            {{worker.user?.login}}
+        </dd>
+        <dt><span jhiTranslate="fixItApp.worker.works">Works</span></dt>
+        <dd>
+            <div *ngIf="worker.works">
+                <a [routerLink]="['/work', worker.works?.id]">{{worker.works?.id}}</a>
+            </div>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            (click)="previousState()"
+            class="btn btn-info">
+        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button"
+            [routerLink]="['/', { outlets: { popup: 'worker/'+ worker.id + '/edit'} }]"
+            replaceUrl="true"
+            class="btn btn-primary">
+        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+    </button>
+</div>

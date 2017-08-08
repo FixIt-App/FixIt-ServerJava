@@ -1,0 +1,76 @@
+<form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+
+    <div class="modal-header">
+        <h4 class="modal-title" id="myWorkerLabel" jhiTranslate="fixItApp.worker.home.createOrEditLabel">Create or edit a Worker</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                (click)="clear()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group" [hidden]="!worker.id">
+            <label for="id" jhiTranslate="global.field.id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                   [(ngModel)]="worker.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" jhiTranslate="fixItApp.worker.documentId" for="field_documentId">Document Id</label>
+            <input type="text" class="form-control" name="documentId" id="field_documentId"
+                [(ngModel)]="worker.documentId" required />
+            <div [hidden]="!(editForm.controls.documentId?.dirty && editForm.controls.documentId?.invalid)">
+                <small class="form-text text-danger"
+                   [hidden]="!editForm.controls.documentId?.errors?.required" jhiTranslate="entity.validation.required">
+                   This field is required.
+                </small>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" jhiTranslate="fixItApp.worker.phone" for="field_phone">Phone</label>
+            <input type="text" class="form-control" name="phone" id="field_phone"
+                [(ngModel)]="worker.phone" required />
+            <div [hidden]="!(editForm.controls.phone?.dirty && editForm.controls.phone?.invalid)">
+                <small class="form-text text-danger"
+                   [hidden]="!editForm.controls.phone?.errors?.required" jhiTranslate="entity.validation.required">
+                   This field is required.
+                </small>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-control-label" jhiTranslate="fixItApp.worker.rh" for="field_rh">Rh</label>
+            <input type="text" class="form-control" name="rh" id="field_rh"
+                [(ngModel)]="worker.rh" required minlength="2" />
+            <div [hidden]="!(editForm.controls.rh?.dirty && editForm.controls.rh?.invalid)">
+                <small class="form-text text-danger"
+                   [hidden]="!editForm.controls.rh?.errors?.required" jhiTranslate="entity.validation.required">
+                   This field is required.
+                </small>
+                <small class="form-text text-danger"
+                   [hidden]="!editForm.controls.rh?.errors?.minlength" jhiTranslate="entity.validation.minlength" translateValues="{ min: 2 }">
+                   This field is required to be at least 2 characters.
+                </small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.worker.user" for="field_user">User</label>
+            <select class="form-control" id="field_user" name="user" [(ngModel)]="worker.user" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="userOption.id === worker.user?.id ? worker.user : userOption" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.worker.works" for="field_works">Works</label>
+            <select class="form-control" id="field_works" name="works" [(ngModel)]="worker.works" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="workOption.id === worker.works?.id ? worker.works : workOption" *ngFor="let workOption of works; trackBy: trackWorkById">{{workOption.id}}</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">
+            <span class="fa fa-ban"></span>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+        <button type="submit" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+            <span class="fa fa-save"></span>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+    </div>
+</form>
