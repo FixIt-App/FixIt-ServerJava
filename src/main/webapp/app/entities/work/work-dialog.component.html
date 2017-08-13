@@ -52,6 +52,34 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.work.worker" for="field_worker">Worker</label>
+            <select class="form-control" id="field_worker" name="worker" [(ngModel)]="work.worker" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="workerOption.id === work.worker?.id ? work.worker : workerOption" *ngFor="let workerOption of workers; trackBy: trackWorkerById">{{workerOption.id}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.work.customer" for="field_customer">Customer</label>
+            <select class="form-control" id="field_customer" name="customer" [(ngModel)]="work.customer" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="customerOption.id === work.customer?.id ? work.customer : customerOption" *ngFor="let customerOption of customers; trackBy: trackCustomerById">{{customerOption.id}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.work.address" for="field_address">Address</label>
+            <select class="form-control" id="field_address" name="address" [(ngModel)]="work.address" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="addressOption.id === work.address?.id ? work.address : addressOption" *ngFor="let addressOption of addresses; trackBy: trackAddressById">{{addressOption.id}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label jhiTranslate="fixItApp.work.worktype" for="field_worktype">Worktype</label>
+            <select class="form-control" id="field_worktype" name="worktype" [(ngModel)]="work.worktype" >
+                <option [ngValue]="null"></option>
+                <option [ngValue]="workTypeOption.id === work.worktype?.id ? work.worktype : workTypeOption" *ngFor="let workTypeOption of worktypes; trackBy: trackWorkTypeById">{{workTypeOption.id}}</option>
+            </select>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">

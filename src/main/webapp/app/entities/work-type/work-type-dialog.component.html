@@ -102,13 +102,6 @@
         </div>
 
         <div class="form-group">
-            <label jhiTranslate="fixItApp.workType.works" for="field_works">Works</label>
-            <select class="form-control" id="field_works" name="works" [(ngModel)]="workType.works" >
-                <option [ngValue]="null"></option>
-                <option [ngValue]="workOption.id === workType.works?.id ? workType.works : workOption" *ngFor="let workOption of works; trackBy: trackWorkById">{{workOption.id}}</option>
-            </select>
-        </div>
-        <div class="form-group">
             <label jhiTranslate="fixItApp.workType.categories" for="field_categories">Categories</label>
             <select class="form-control" id="field_categories" multiple name="categories" [(ngModel)]="workType.categories">
                 <option [ngValue]="getSelected(workType.categories, workTypeCategoryOption)" *ngFor="let workTypeCategoryOption of worktypecategories; trackBy: trackWorkTypeCategoryById">{{workTypeCategoryOption.id}}</option>

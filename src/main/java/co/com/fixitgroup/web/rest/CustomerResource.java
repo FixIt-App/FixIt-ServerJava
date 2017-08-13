@@ -1,5 +1,6 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Customer;
 
@@ -81,6 +82,19 @@ public class CustomerResource {
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, customer.getId().toString()))
             .body(result);
+    }
+
+    @GetMapping("/customer/authenticated")
+    @Timed
+    public ResponseEntity<Customer> getCurrentCustomer() {
+        String login = SecurityUtils.getCurrentUserLogin();
+        Optional<Customer> customerOptional = customerRepository.getCustomerByUser(login);
+        if (customerOptional.isPresent()) {
+            return new ResponseEntity<Customer>(
+                customerOptional.get(), HttpStatus.OK
+            );
+        }
+        return new ResponseEntity<Customer>(HttpStatus.NOT_FOUND);
     }
 
     /**

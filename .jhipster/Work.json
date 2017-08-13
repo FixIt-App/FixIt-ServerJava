@@ -2,28 +2,28 @@
     "fluentMethods": true,
     "relationships": [
         {
-            "relationshipType": "one-to-many",
+            "relationshipType": "many-to-one",
             "relationshipName": "worker",
             "otherEntityName": "worker",
-            "otherEntityRelationshipName": "works"
+            "otherEntityField": "id"
         },
         {
-            "relationshipType": "one-to-many",
+            "relationshipType": "many-to-one",
             "relationshipName": "customer",
             "otherEntityName": "customer",
-            "otherEntityRelationshipName": "works"
+            "otherEntityField": "id"
         },
         {
-            "relationshipType": "one-to-many",
+            "relationshipType": "many-to-one",
             "relationshipName": "address",
             "otherEntityName": "address",
-            "otherEntityRelationshipName": "works"
+            "otherEntityField": "id"
         },
         {
-            "relationshipType": "one-to-many",
+            "relationshipType": "many-to-one",
             "relationshipName": "worktype",
             "otherEntityName": "workType",
-            "otherEntityRelationshipName": "works"
+            "otherEntityField": "id"
         }
     ],
     "fields": [

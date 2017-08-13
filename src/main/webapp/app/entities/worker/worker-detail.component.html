@@ -20,12 +20,6 @@
         <dd>
             {{worker.user?.login}}
         </dd>
-        <dt><span jhiTranslate="fixItApp.worker.works">Works</span></dt>
-        <dd>
-            <div *ngIf="worker.works">
-                <a [routerLink]="['/work', worker.works?.id]">{{worker.works?.id}}</a>
-            </div>
-        </dd>
     </dl>
 
     <button type="submit"

@@ -9,7 +9,6 @@ import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
 import { WorkType } from './work-type.model';
 import { WorkTypePopupService } from './work-type-popup.service';
 import { WorkTypeService } from './work-type.service';
-import { Work, WorkService } from '../work';
 import { WorkTypeCategory, WorkTypeCategoryService } from '../work-type-category';
 import { Worker, WorkerService } from '../worker';
 import { ResponseWrapper } from '../../shared';
@@ -23,8 +22,6 @@ export class WorkTypeDialogComponent implements OnInit {
     workType: WorkType;
     isSaving: boolean;
 
-    works: Work[];
-
     worktypecategories: WorkTypeCategory[];
 
     workers: Worker[];
@@ -33,7 +30,6 @@ export class WorkTypeDialogComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private alertService: JhiAlertService,
         private workTypeService: WorkTypeService,
-        private workService: WorkService,
         private workTypeCategoryService: WorkTypeCategoryService,
         private workerService: WorkerService,
         private eventManager: JhiEventManager
@@ -42,8 +38,6 @@ export class WorkTypeDialogComponent implements OnInit {
 
     ngOnInit() {
         this.isSaving = false;
-        this.workService.query()
-            .subscribe((res: ResponseWrapper) => { this.works = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
         this.workTypeCategoryService.query()
             .subscribe((res: ResponseWrapper) => { this.worktypecategories = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
         this.workerService.query()
@@ -88,10 +82,6 @@ export class WorkTypeDialogComponent implements OnInit {
 
     private onError(error) {
         this.alertService.error(error.message, null, null);
-    }
-
-    trackWorkById(index: number, item: Work) {
-        return item.id;
     }
 
     trackWorkTypeCategoryById(index: number, item: WorkTypeCategory) {

@@ -1,13 +1,10 @@
 package co.com.fixitgroup.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -36,21 +33,17 @@ public class Work implements Serializable {
     @Column(name = "asap", nullable = false)
     private Boolean asap;
 
-    @OneToMany(mappedBy = "works")
-    @JsonIgnore
-    private Set<Worker> workers = new HashSet<>();
+    @ManyToOne
+    private Worker worker;
 
-    @OneToMany(mappedBy = "works")
-    @JsonIgnore
-    private Set<Customer> customers = new HashSet<>();
+    @ManyToOne
+    private Customer customer;
 
-    @OneToMany(mappedBy = "works")
-    @JsonIgnore
-    private Set<Address> addresses = new HashSet<>();
+    @ManyToOne
+    private Address address;
 
-    @OneToMany(mappedBy = "works")
-    @JsonIgnore
-    private Set<WorkType> worktypes = new HashSet<>();
+    @ManyToOne
+    private WorkType worktype;
 
     public Long getId() {
         return id;
@@ -99,104 +92,56 @@ public class Work implements Serializable {
         this.asap = asap;
     }
 
-    public Set<Worker> getWorkers() {
-        return workers;
+    public Worker getWorker() {
+        return worker;
     }
 
-    public Work workers(Set<Worker> workers) {
-        this.workers = workers;
+    public Work worker(Worker worker) {
+        this.worker = worker;
         return this;
     }
 
-    public Work addWorker(Worker worker) {
-        this.workers.add(worker);
-        worker.setWorks(this);
+    public void setWorker(Worker worker) {
+        this.worker = worker;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public Work customer(Customer customer) {
+        this.customer = customer;
         return this;
     }
 
-    public Work removeWorker(Worker worker) {
-        this.workers.remove(worker);
-        worker.setWorks(null);
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public Work address(Address address) {
+        this.address = address;
         return this;
     }
 
-    public void setWorkers(Set<Worker> workers) {
-        this.workers = workers;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
-    public Set<Customer> getCustomers() {
-        return customers;
+    public WorkType getWorktype() {
+        return worktype;
     }
 
-    public Work customers(Set<Customer> customers) {
-        this.customers = customers;
+    public Work worktype(WorkType workType) {
+        this.worktype = workType;
         return this;
     }
 
-    public Work addCustomer(Customer customer) {
-        this.customers.add(customer);
-        customer.setWorks(this);
-        return this;
-    }
-
-    public Work removeCustomer(Customer customer) {
-        this.customers.remove(customer);
-        customer.setWorks(null);
-        return this;
-    }
-
-    public void setCustomers(Set<Customer> customers) {
-        this.customers = customers;
-    }
-
-    public Set<Address> getAddresses() {
-        return addresses;
-    }
-
-    public Work addresses(Set<Address> addresses) {
-        this.addresses = addresses;
-        return this;
-    }
-
-    public Work addAddress(Address address) {
-        this.addresses.add(address);
-        address.setWorks(this);
-        return this;
-    }
-
-    public Work removeAddress(Address address) {
-        this.addresses.remove(address);
-        address.setWorks(null);
-        return this;
-    }
-
-    public void setAddresses(Set<Address> addresses) {
-        this.addresses = addresses;
-    }
-
-    public Set<WorkType> getWorktypes() {
-        return worktypes;
-    }
-
-    public Work worktypes(Set<WorkType> workTypes) {
-        this.worktypes = workTypes;
-        return this;
-    }
-
-    public Work addWorktype(WorkType workType) {
-        this.worktypes.add(workType);
-        workType.setWorks(this);
-        return this;
-    }
-
-    public Work removeWorktype(WorkType workType) {
-        this.worktypes.remove(workType);
-        workType.setWorks(null);
-        return this;
-    }
-
-    public void setWorktypes(Set<WorkType> workTypes) {
-        this.worktypes = workTypes;
+    public void setWorktype(WorkType workType) {
+        this.worktype = workType;
     }
 
     @Override

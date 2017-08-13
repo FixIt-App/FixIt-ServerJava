@@ -1,0 +1,9 @@
+{
+    "fixItApp": {
+        "CONFIRMATION_TYPE" : {
+            "null": "",
+            "EMAIL": "EMAIL",
+            "SMS": "SMS"
+        }
+    }
+}

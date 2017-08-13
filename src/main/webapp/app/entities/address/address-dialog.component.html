@@ -86,13 +86,6 @@
                 <option [ngValue]="customerOption.id === address.customer?.id ? address.customer : customerOption" *ngFor="let customerOption of customers; trackBy: trackCustomerById">{{customerOption.id}}</option>
             </select>
         </div>
-        <div class="form-group">
-            <label jhiTranslate="fixItApp.address.works" for="field_works">Works</label>
-            <select class="form-control" id="field_works" name="works" [(ngModel)]="address.works" >
-                <option [ngValue]="null"></option>
-                <option [ngValue]="workOption.id === address.works?.id ? address.works : workOption" *ngFor="let workOption of works; trackBy: trackWorkById">{{workOption.id}}</option>
-            </select>
-        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">

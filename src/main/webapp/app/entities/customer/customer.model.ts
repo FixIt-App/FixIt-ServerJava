@@ -5,8 +5,9 @@ export class Customer implements BaseEntity {
         public id?: number,
         public phone?: string,
         public user?: User,
-        public works?: BaseEntity,
         public addresses?: BaseEntity[],
+        public works?: BaseEntity[],
+        public confirmations?: BaseEntity[],
     ) {
     }
 }

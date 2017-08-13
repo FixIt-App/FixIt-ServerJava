@@ -10,10 +10,10 @@
             "otherEntityRelationshipName": "worker"
         },
         {
-            "relationshipType": "many-to-one",
+            "relationshipType": "one-to-many",
             "relationshipName": "works",
             "otherEntityName": "work",
-            "otherEntityField": "id"
+            "otherEntityRelationshipName": "worker"
         },
         {
             "relationshipType": "many-to-many",

@@ -32,12 +32,6 @@
         <dd>
             <span>{{workType.urlName}}</span>
         </dd>
-        <dt><span jhiTranslate="fixItApp.workType.works">Works</span></dt>
-        <dd>
-            <div *ngIf="workType.works">
-                <a [routerLink]="['/work', workType.works?.id]">{{workType.works?.id}}</a>
-            </div>
-        </dd>
         <dt><span jhiTranslate="fixItApp.workType.categories">Categories</span></dt>
         <dd>
             <span *ngFor="let categories of workType.categories; let last = last">

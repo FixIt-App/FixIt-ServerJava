@@ -6,10 +6,10 @@ export class Work implements BaseEntity {
         public time?: any,
         public description?: string,
         public asap?: boolean,
-        public workers?: BaseEntity[],
-        public customers?: BaseEntity[],
-        public addresses?: BaseEntity[],
-        public worktypes?: BaseEntity[],
+        public worker?: BaseEntity,
+        public customer?: BaseEntity,
+        public address?: BaseEntity,
+        public worktype?: BaseEntity,
     ) {
         this.asap = false;
     }

@@ -33,6 +33,22 @@
                 <constraints nullable="false" />
             </column>
 
+            <column name="worker_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="customer_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="address_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="worktype_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
         <dropDefaultValue tableName="work" columnName="jhi_time" columnDataType="datetime"/>

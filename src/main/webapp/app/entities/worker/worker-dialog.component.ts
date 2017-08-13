@@ -10,7 +10,6 @@ import { Worker } from './worker.model';
 import { WorkerPopupService } from './worker-popup.service';
 import { WorkerService } from './worker.service';
 import { User, UserService } from '../../shared';
-import { Work, WorkService } from '../work';
 import { WorkType, WorkTypeService } from '../work-type';
 import { ResponseWrapper } from '../../shared';
 
@@ -25,8 +24,6 @@ export class WorkerDialogComponent implements OnInit {
 
     users: User[];
 
-    works: Work[];
-
     worktypes: WorkType[];
 
     constructor(
@@ -34,7 +31,6 @@ export class WorkerDialogComponent implements OnInit {
         private alertService: JhiAlertService,
         private workerService: WorkerService,
         private userService: UserService,
-        private workService: WorkService,
         private workTypeService: WorkTypeService,
         private eventManager: JhiEventManager
     ) {
@@ -44,8 +40,6 @@ export class WorkerDialogComponent implements OnInit {
         this.isSaving = false;
         this.userService.query()
             .subscribe((res: ResponseWrapper) => { this.users = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
-        this.workService.query()
-            .subscribe((res: ResponseWrapper) => { this.works = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
         this.workTypeService.query()
             .subscribe((res: ResponseWrapper) => { this.worktypes = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
     }
@@ -91,10 +85,6 @@ export class WorkerDialogComponent implements OnInit {
     }
 
     trackUserById(index: number, item: User) {
-        return item.id;
-    }
-
-    trackWorkById(index: number, item: Work) {
         return item.id;
     }
 

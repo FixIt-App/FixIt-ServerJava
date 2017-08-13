@@ -3,9 +3,16 @@ package co.com.fixitgroup.web.rest;
 import co.com.fixitgroup.FixItApp;
 
 import co.com.fixitgroup.domain.Customer;
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.repository.CustomerRepository;
+import co.com.fixitgroup.repository.UserRepository;
+import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.JWTConfigurer;
+import co.com.fixitgroup.security.jwt.JWTFilter;
+import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,14 +20,23 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.web.MockFilterChain;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,9 +55,13 @@ public class CustomerResourceIntTest {
 
     private static final String DEFAULT_PHONE = "AAAAAAAAAA";
     private static final String UPDATED_PHONE = "BBBBBBBBBB";
+    private static final String DEFAULT_LOGIN = "example@mail.com";
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -53,15 +73,22 @@ public class CustomerResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
     private EntityManager em;
 
     private MockMvc restCustomerMockMvc;
 
     private Customer customer;
 
+    private User user;
+
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        SecurityContextHolder.getContext().setAuthentication(null);
         CustomerResource customerResource = new CustomerResource(customerRepository);
         this.restCustomerMockMvc = MockMvcBuilders.standaloneSetup(customerResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -83,7 +110,51 @@ public class CustomerResourceIntTest {
 
     @Before
     public void initTest() {
+        user = UserResourceIntTest.createEntity(em);
         customer = createEntity(em);
+    }
+
+    @Test
+    @Transactional
+    public void getCurrentCustomerTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+        restCustomerMockMvc
+            .perform(get("/api/customer/authenticated")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @Transactional
+    public void getCurrentCustomerNoAuth() throws Exception {
+        userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            "randomUnknown", user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+        restCustomerMockMvc
+            .perform(get("/api/customer/authenticated")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isNotFound());
     }
 
     @Test

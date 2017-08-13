@@ -1,9 +1,12 @@
 package co.com.fixitgroup.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -47,8 +50,9 @@ public class Address implements Serializable {
     @ManyToOne
     private Customer customer;
 
-    @ManyToOne
-    private Work works;
+    @OneToMany(mappedBy = "address")
+    @JsonIgnore
+    private Set<Work> works = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -149,17 +153,29 @@ public class Address implements Serializable {
         this.customer = customer;
     }
 
-    public Work getWorks() {
+    public Set<Work> getWorks() {
         return works;
     }
 
-    public Address works(Work work) {
-        this.works = work;
+    public Address works(Set<Work> works) {
+        this.works = works;
         return this;
     }
 
-    public void setWorks(Work work) {
-        this.works = work;
+    public Address addWorks(Work work) {
+        this.works.add(work);
+        work.setAddress(this);
+        return this;
+    }
+
+    public Address removeWorks(Work work) {
+        this.works.remove(work);
+        work.setAddress(null);
+        return this;
+    }
+
+    public void setWorks(Set<Work> works) {
+        this.works = works;
     }
 
     @Override

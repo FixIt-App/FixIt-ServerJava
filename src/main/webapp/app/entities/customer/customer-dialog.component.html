@@ -31,13 +31,6 @@
                 <option [ngValue]="userOption.id === customer.user?.id ? customer.user : userOption" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
             </select>
         </div>
-        <div class="form-group">
-            <label jhiTranslate="fixItApp.customer.works" for="field_works">Works</label>
-            <select class="form-control" id="field_works" name="works" [(ngModel)]="customer.works" >
-                <option [ngValue]="null"></option>
-                <option [ngValue]="workOption.id === customer.works?.id ? customer.works : workOption" *ngFor="let workOption of works; trackBy: trackWorkById">{{workOption.id}}</option>
-            </select>
-        </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" (click)="clear()">

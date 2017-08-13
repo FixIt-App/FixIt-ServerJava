@@ -34,12 +34,6 @@
                 <a [routerLink]="['/customer', address.customer?.id]">{{address.customer?.id}}</a>
             </div>
         </dd>
-        <dt><span jhiTranslate="fixItApp.address.works">Works</span></dt>
-        <dd>
-            <div *ngIf="address.works">
-                <a [routerLink]="['/work', address.works?.id]">{{address.works?.id}}</a>
-            </div>
-        </dd>
     </dl>
 
     <button type="submit"

@@ -10,7 +10,6 @@ import { Address } from './address.model';
 import { AddressPopupService } from './address-popup.service';
 import { AddressService } from './address.service';
 import { Customer, CustomerService } from '../customer';
-import { Work, WorkService } from '../work';
 import { ResponseWrapper } from '../../shared';
 
 @Component({
@@ -24,14 +23,11 @@ export class AddressDialogComponent implements OnInit {
 
     customers: Customer[];
 
-    works: Work[];
-
     constructor(
         public activeModal: NgbActiveModal,
         private alertService: JhiAlertService,
         private addressService: AddressService,
         private customerService: CustomerService,
-        private workService: WorkService,
         private eventManager: JhiEventManager
     ) {
     }
@@ -40,8 +36,6 @@ export class AddressDialogComponent implements OnInit {
         this.isSaving = false;
         this.customerService.query()
             .subscribe((res: ResponseWrapper) => { this.customers = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
-        this.workService.query()
-            .subscribe((res: ResponseWrapper) => { this.works = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
     }
 
     clear() {
@@ -85,10 +79,6 @@ export class AddressDialogComponent implements OnInit {
     }
 
     trackCustomerById(index: number, item: Customer) {
-        return item.id;
-    }
-
-    trackWorkById(index: number, item: Work) {
         return item.id;
     }
 }

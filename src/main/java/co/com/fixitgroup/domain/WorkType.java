@@ -1,5 +1,6 @@
 package co.com.fixitgroup.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -53,9 +54,6 @@ public class WorkType implements Serializable {
     @Column(name = "url_name", nullable = false)
     private String urlName;
 
-    @ManyToOne
-    private Work works;
-
     @ManyToMany
     @JoinTable(name = "work_type_categories",
                joinColumns = @JoinColumn(name="work_types_id", referencedColumnName="id"),
@@ -67,6 +65,10 @@ public class WorkType implements Serializable {
                joinColumns = @JoinColumn(name="work_types_id", referencedColumnName="id"),
                inverseJoinColumns = @JoinColumn(name="workers_id", referencedColumnName="id"))
     private Set<Worker> workers = new HashSet<>();
+
+    @OneToMany(mappedBy = "worktype")
+    @JsonIgnore
+    private Set<Work> works = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -167,19 +169,6 @@ public class WorkType implements Serializable {
         this.urlName = urlName;
     }
 
-    public Work getWorks() {
-        return works;
-    }
-
-    public WorkType works(Work work) {
-        this.works = work;
-        return this;
-    }
-
-    public void setWorks(Work work) {
-        this.works = work;
-    }
-
     public Set<WorkTypeCategory> getCategories() {
         return categories;
     }
@@ -228,6 +217,31 @@ public class WorkType implements Serializable {
 
     public void setWorkers(Set<Worker> workers) {
         this.workers = workers;
+    }
+
+    public Set<Work> getWorks() {
+        return works;
+    }
+
+    public WorkType works(Set<Work> works) {
+        this.works = works;
+        return this;
+    }
+
+    public WorkType addWorks(Work work) {
+        this.works.add(work);
+        work.setWorktype(this);
+        return this;
+    }
+
+    public WorkType removeWorks(Work work) {
+        this.works.remove(work);
+        work.setWorktype(null);
+        return this;
+    }
+
+    public void setWorks(Set<Work> works) {
+        this.works = works;
     }
 
     @Override
