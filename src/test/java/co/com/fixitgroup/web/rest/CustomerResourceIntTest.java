@@ -11,10 +11,10 @@ import co.com.fixitgroup.security.jwt.JWTConfigurer;
 import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.service.CustomerService;
 import co.com.fixitgroup.service.dto.CustomerDTO;
-import co.com.fixitgroup.service.dto.UserDTO;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
 import co.com.fixitgroup.web.rest.vm.ManagedUserVM;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +29,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +90,7 @@ public class CustomerResourceIntTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         SecurityContextHolder.getContext().setAuthentication(null);
-        CustomerResource customerResource = new CustomerResource(customerRepository, customerService);
+        CustomerResource customerResource = new CustomerResource(customerRepository, customerService, userRepository);
         this.restCustomerMockMvc = MockMvcBuilders.standaloneSetup(customerResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -135,6 +136,32 @@ public class CustomerResourceIntTest {
             .andExpect(status().isOk());
     }
 
+
+    @Test
+    @Transactional
+    public void isEmailAvailableTest() throws Exception {
+        userRepository.saveAndFlush(user);
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/email/blabla/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assert.assertEquals(result.getResponse().getContentAsString(), "true");
+    }
+
+    @Test
+    @Transactional
+    public void isEmailNotAvailableTest() throws Exception {
+        userRepository.saveAndFlush(user);
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/email/johndoe/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assert.assertEquals(result.getResponse().getContentAsString(), "false");
+    }
 
     @Test
     @Transactional

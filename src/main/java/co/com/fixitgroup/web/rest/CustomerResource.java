@@ -1,5 +1,7 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.domain.User;
+import co.com.fixitgroup.repository.UserRepository;
 import co.com.fixitgroup.security.SecurityUtils;
 import co.com.fixitgroup.service.CustomerService;
 import co.com.fixitgroup.service.dto.CustomerDTO;
@@ -41,9 +43,12 @@ public class CustomerResource {
 
     private final CustomerService customerService;
 
-    public CustomerResource(CustomerRepository customerRepository, CustomerService customerService) {
+    private final UserRepository userRepository;
+
+    public CustomerResource(CustomerRepository customerRepository, CustomerService customerService, UserRepository userRepository) {
         this.customerRepository = customerRepository;
         this.customerService = customerService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -103,6 +108,16 @@ public class CustomerResource {
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, customer.getId().toString()))
             .body(result);
+    }
+
+    @GetMapping("/api/customer/email/{email}/available")
+    @Timed
+    public ResponseEntity<Boolean> isEmailAvalable(@PathVariable String email) {
+        Optional<User> userOptional = userRepository.findOneByLogin(email);
+        if(userOptional.isPresent()){
+            return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+        }
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
     }
 
     @GetMapping("/api/customer/authenticated")
