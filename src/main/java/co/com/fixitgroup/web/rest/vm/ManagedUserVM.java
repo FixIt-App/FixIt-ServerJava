@@ -1,6 +1,9 @@
 package co.com.fixitgroup.web.rest.vm;
 
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.service.dto.UserDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.validation.constraints.Size;
 
 import java.time.Instant;
@@ -22,6 +25,10 @@ public class ManagedUserVM extends UserDTO {
         // Empty constructor needed for Jackson.
     }
 
+    public ManagedUserVM(User user){
+        super(user);
+    }
+
     public ManagedUserVM(Long id, String login, String password, String firstName, String lastName,
                          String email, boolean activated, String imageUrl, String langKey,
                          String createdBy, Instant createdDate, String lastModifiedBy, Instant lastModifiedDate,
@@ -35,6 +42,10 @@ public class ManagedUserVM extends UserDTO {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

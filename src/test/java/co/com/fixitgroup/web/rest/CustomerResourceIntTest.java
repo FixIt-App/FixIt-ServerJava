@@ -14,6 +14,7 @@ import co.com.fixitgroup.service.dto.CustomerDTO;
 import co.com.fixitgroup.service.dto.UserDTO;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import co.com.fixitgroup.web.rest.vm.ManagedUserVM;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -158,16 +159,53 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
-        public void createCustomer() throws Exception {
+    public void createCustomerV1() throws Exception {
+        int databaseSizeBeforeCreate = customerRepository.findAll().size();
+
+        // Create the Customer
+        restCustomerMockMvc.perform(post("/api/customers")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(customer)))
+            .andExpect(status().isCreated());
+
+        // Validate the Customer in the database
+        List<Customer> customerList = customerRepository.findAll();
+        assertThat(customerList).hasSize(databaseSizeBeforeCreate + 1);
+        Customer testCustomer = customerList.get(customerList.size() - 1);
+        assertThat(testCustomer.getPhone()).isEqualTo(DEFAULT_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void createCustomerWithExistingId() throws Exception {
+        int databaseSizeBeforeCreate = customerRepository.findAll().size();
+
+        // Create the Customer with an existing ID
+        customer.setId(1L);
+
+        // An entity with an existing ID cannot be created, so this API call must fail
+        restCustomerMockMvc.perform(post("/api/customers")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(customer)))
+            .andExpect(status().isBadRequest());
+
+        // Validate the Alice in the database
+        List<Customer> customerList = customerRepository.findAll();
+        assertThat(customerList).hasSize(databaseSizeBeforeCreate);
+    }
+
+    @Test
+    @Transactional
+    public void createCustomer() throws Exception {
         int databaseSizeBeforeCreate = customerRepository.findAll().size();
         CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setPhone(customer.getPhone());
         User user = UserResourceIntTest.createEntity(em);
-        UserDTO userDTO = new UserDTO(user);
+        ManagedUserVM userDTO = new ManagedUserVM(user);
         userDTO.setPassword("1233444213");
         customerDTO.setUser(userDTO);
         // Create the Customer
-        restCustomerMockMvc.perform(post("/api/customers")
+        restCustomerMockMvc.perform(post("/api/v2/customers")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(customerDTO)))
             .andExpect(status().isCreated());

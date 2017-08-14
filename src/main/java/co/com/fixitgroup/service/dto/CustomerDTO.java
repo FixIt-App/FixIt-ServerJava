@@ -1,6 +1,8 @@
 package co.com.fixitgroup.service.dto;
 
 
+import co.com.fixitgroup.web.rest.vm.ManagedUserVM;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -10,13 +12,13 @@ public class CustomerDTO {
     @NotNull
     private String phone;
     @NotNull
-    private UserDTO user;
+    private ManagedUserVM user;
 
-    public UserDTO getUser() {
+    public ManagedUserVM getUser() {
         return user;
     }
 
-    public void setUser(UserDTO user) {
+    public void setUser(ManagedUserVM user) {
         this.user = user;
     }
 
