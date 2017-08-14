@@ -1,6 +1,8 @@
 package co.com.fixitgroup.web.rest;
 
 import co.com.fixitgroup.security.SecurityUtils;
+import co.com.fixitgroup.service.CustomerService;
+import co.com.fixitgroup.service.dto.CustomerDTO;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Customer;
 
@@ -38,8 +40,11 @@ public class CustomerResource {
 
     private final CustomerRepository customerRepository;
 
-    public CustomerResource(CustomerRepository customerRepository) {
+    private final CustomerService customerService;
+
+    public CustomerResource(CustomerRepository customerRepository, CustomerService customerService) {
         this.customerRepository = customerRepository;
+        this.customerService = customerService;
     }
 
     /**
@@ -51,12 +56,9 @@ public class CustomerResource {
      */
     @PostMapping("/customers")
     @Timed
-    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody CustomerDTO customer) throws URISyntaxException {
         log.debug("REST request to save Customer : {}", customer);
-        if (customer.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new customer cannot already have an ID")).body(null);
-        }
-        Customer result = customerRepository.save(customer);
+        Customer result = customerService.createCustomer(customer);
         return ResponseEntity.created(new URI("/api/customers/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -66,7 +68,7 @@ public class CustomerResource {
      * PUT  /customers : Updates an existing customer.
      *
      * @param customer the customer to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated customer,
+     * @return the ReºsponseEntity with status 200 (OK) and with body the updated customer,
      * or with status 400 (Bad Request) if the customer is not valid,
      * or with status 500 (Internal Server Error) if the customer couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
@@ -76,7 +78,7 @@ public class CustomerResource {
     public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
         log.debug("REST request to update Customer : {}", customer);
         if (customer.getId() == null) {
-            return createCustomer(customer);
+            return new ResponseEntity<Customer>(HttpStatus.BAD_REQUEST);
         }
         Customer result = customerRepository.save(customer);
         return ResponseEntity.ok()

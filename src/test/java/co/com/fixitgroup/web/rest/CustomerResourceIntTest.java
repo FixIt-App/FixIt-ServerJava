@@ -8,11 +8,12 @@ import co.com.fixitgroup.repository.CustomerRepository;
 import co.com.fixitgroup.repository.UserRepository;
 import co.com.fixitgroup.security.AuthoritiesConstants;
 import co.com.fixitgroup.security.jwt.JWTConfigurer;
-import co.com.fixitgroup.security.jwt.JWTFilter;
 import co.com.fixitgroup.security.jwt.TokenProvider;
+import co.com.fixitgroup.service.CustomerService;
+import co.com.fixitgroup.service.dto.CustomerDTO;
+import co.com.fixitgroup.service.dto.UserDTO;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
-import io.github.jhipster.config.JHipsterProperties;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,17 +21,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +74,9 @@ public class CustomerResourceIntTest {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private CustomerService customerService;
+
     private MockMvc restCustomerMockMvc;
 
     private Customer customer;
@@ -89,7 +88,7 @@ public class CustomerResourceIntTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         SecurityContextHolder.getContext().setAuthentication(null);
-        CustomerResource customerResource = new CustomerResource(customerRepository);
+        CustomerResource customerResource = new CustomerResource(customerRepository, customerService);
         this.restCustomerMockMvc = MockMvcBuilders.standaloneSetup(customerResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -159,13 +158,18 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
-    public void createCustomer() throws Exception {
+        public void createCustomer() throws Exception {
         int databaseSizeBeforeCreate = customerRepository.findAll().size();
-
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setPhone(customer.getPhone());
+        User user = UserResourceIntTest.createEntity(em);
+        UserDTO userDTO = new UserDTO(user);
+        userDTO.setPassword("1233444213");
+        customerDTO.setUser(userDTO);
         // Create the Customer
         restCustomerMockMvc.perform(post("/api/customers")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(customer)))
+            .content(TestUtil.convertObjectToJsonBytes(customerDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Customer in the database
@@ -173,25 +177,6 @@ public class CustomerResourceIntTest {
         assertThat(customerList).hasSize(databaseSizeBeforeCreate + 1);
         Customer testCustomer = customerList.get(customerList.size() - 1);
         assertThat(testCustomer.getPhone()).isEqualTo(DEFAULT_PHONE);
-    }
-
-    @Test
-    @Transactional
-    public void createCustomerWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = customerRepository.findAll().size();
-
-        // Create the Customer with an existing ID
-        customer.setId(1L);
-
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restCustomerMockMvc.perform(post("/api/customers")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(customer)))
-            .andExpect(status().isBadRequest());
-
-        // Validate the Alice in the database
-        List<Customer> customerList = customerRepository.findAll();
-        assertThat(customerList).hasSize(databaseSizeBeforeCreate);
     }
 
     @Test
@@ -230,6 +215,8 @@ public class CustomerResourceIntTest {
     @Transactional
     public void getCustomer() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(user);
+        customer.setUser(user);
         customerRepository.saveAndFlush(customer);
 
         // Get the customer
@@ -270,24 +257,6 @@ public class CustomerResourceIntTest {
         assertThat(customerList).hasSize(databaseSizeBeforeUpdate);
         Customer testCustomer = customerList.get(customerList.size() - 1);
         assertThat(testCustomer.getPhone()).isEqualTo(UPDATED_PHONE);
-    }
-
-    @Test
-    @Transactional
-    public void updateNonExistingCustomer() throws Exception {
-        int databaseSizeBeforeUpdate = customerRepository.findAll().size();
-
-        // Create the Customer
-
-        // If the entity doesn't have an ID, it will be created instead of just being updated
-        restCustomerMockMvc.perform(put("/api/customers")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(customer)))
-            .andExpect(status().isCreated());
-
-        // Validate the Customer in the database
-        List<Customer> customerList = customerRepository.findAll();
-        assertThat(customerList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test

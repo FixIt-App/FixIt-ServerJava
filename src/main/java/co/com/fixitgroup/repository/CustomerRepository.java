@@ -11,11 +11,10 @@ import java.util.Optional;
 /**
  * Spring Data JPA repository for the Customer entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
-    @Query("SELECT c FROM Customer c JOIN FETCH c.user user WHERE user.login = ?1")
+    @Query("SELECT c FROM Customer c JOIN FETCH c.user user  LEFT JOIN FETCH c.confirmations WHERE user.login = ?1")
     Optional<Customer> getCustomerByUser(String login);
 
 }
