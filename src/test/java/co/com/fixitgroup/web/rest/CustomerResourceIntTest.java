@@ -139,6 +139,36 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    public void isPhoneAvailableTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/phone/blabla/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    @Transactional
+    public void isPhoneNotAvailableTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/phone/".concat(DEFAULT_PHONE).concat("/available"))
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    @Transactional
     public void isEmailAvailableTest() throws Exception {
         userRepository.saveAndFlush(user);
         MvcResult result = restCustomerMockMvc

@@ -120,6 +120,17 @@ public class CustomerResource {
         return new ResponseEntity<Boolean>(true, HttpStatus.OK);
     }
 
+
+    @GetMapping("/api/customer/phone/{phone}/available")
+    @Timed
+    public ResponseEntity<Boolean> isPhoneAvalable(@PathVariable String phone) {
+        Optional<Customer> customerOptional = customerRepository.findOneByPhoneEquals(phone);
+        if(customerOptional.isPresent()){
+            return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+        }
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+    }
+
     @GetMapping("/api/customer/authenticated")
     @Timed
     public ResponseEntity<Customer> getCurrentCustomer() {
