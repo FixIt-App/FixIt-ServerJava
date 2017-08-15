@@ -21,7 +21,6 @@
             <th jhiSortBy="phone"><span jhiTranslate="fixItApp.worker.phone">Phone</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="rh"><span jhiTranslate="fixItApp.worker.rh">Rh</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="user.login"><span jhiTranslate="fixItApp.worker.user">User</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="works.id"><span jhiTranslate="fixItApp.worker.works">Works</span> <span class="fa fa-sort"></span></th>
             <th></th>
             </tr>
             </thead>
@@ -33,11 +32,6 @@
                 <td>{{worker.rh}}</td>
                 <td>
                     {{worker.user?.login}}
-                </td>
-                <td>
-                    <div *ngIf="worker.works">
-                        <a [routerLink]="['../work', worker.works?.id ]" >{{worker.works?.id}}</a>
-                    </div>
                 </td>
                 <td class="text-right">
                     <div class="btn-group flex-btn-group-container">

@@ -10,15 +10,21 @@
             "otherEntityRelationshipName": "customer"
         },
         {
-            "relationshipType": "many-to-one",
-            "relationshipName": "works",
-            "otherEntityName": "work",
-            "otherEntityField": "id"
-        },
-        {
             "relationshipType": "one-to-many",
             "relationshipName": "addresses",
             "otherEntityName": "address",
+            "otherEntityRelationshipName": "customer"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "works",
+            "otherEntityName": "work",
+            "otherEntityRelationshipName": "customer"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "confirmations",
+            "otherEntityName": "confirmation",
             "otherEntityRelationshipName": "customer"
         }
     ],

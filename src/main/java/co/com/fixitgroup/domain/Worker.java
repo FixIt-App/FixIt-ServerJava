@@ -40,8 +40,9 @@ public class Worker implements Serializable {
     @JoinColumn(unique = true)
     private User user;
 
-    @ManyToOne
-    private Work works;
+    @OneToMany(mappedBy = "worker")
+    @JsonIgnore
+    private Set<Work> works = new HashSet<>();
 
     @ManyToMany(mappedBy = "workers")
     @JsonIgnore
@@ -107,17 +108,29 @@ public class Worker implements Serializable {
         this.user = user;
     }
 
-    public Work getWorks() {
+    public Set<Work> getWorks() {
         return works;
     }
 
-    public Worker works(Work work) {
-        this.works = work;
+    public Worker works(Set<Work> works) {
+        this.works = works;
         return this;
     }
 
-    public void setWorks(Work work) {
-        this.works = work;
+    public Worker addWorks(Work work) {
+        this.works.add(work);
+        work.setWorker(this);
+        return this;
+    }
+
+    public Worker removeWorks(Work work) {
+        this.works.remove(work);
+        work.setWorker(null);
+        return this;
+    }
+
+    public void setWorks(Set<Work> works) {
+        this.works = works;
     }
 
     public Set<WorkType> getWorkTypes() {

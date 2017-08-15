@@ -9,6 +9,11 @@ import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
 import { Work } from './work.model';
 import { WorkPopupService } from './work-popup.service';
 import { WorkService } from './work.service';
+import { Worker, WorkerService } from '../worker';
+import { Customer, CustomerService } from '../customer';
+import { Address, AddressService } from '../address';
+import { WorkType, WorkTypeService } from '../work-type';
+import { ResponseWrapper } from '../../shared';
 
 @Component({
     selector: 'jhi-work-dialog',
@@ -19,16 +24,36 @@ export class WorkDialogComponent implements OnInit {
     work: Work;
     isSaving: boolean;
 
+    workers: Worker[];
+
+    customers: Customer[];
+
+    addresses: Address[];
+
+    worktypes: WorkType[];
+
     constructor(
         public activeModal: NgbActiveModal,
         private alertService: JhiAlertService,
         private workService: WorkService,
+        private workerService: WorkerService,
+        private customerService: CustomerService,
+        private addressService: AddressService,
+        private workTypeService: WorkTypeService,
         private eventManager: JhiEventManager
     ) {
     }
 
     ngOnInit() {
         this.isSaving = false;
+        this.workerService.query()
+            .subscribe((res: ResponseWrapper) => { this.workers = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
+        this.customerService.query()
+            .subscribe((res: ResponseWrapper) => { this.customers = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
+        this.addressService.query()
+            .subscribe((res: ResponseWrapper) => { this.addresses = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
+        this.workTypeService.query()
+            .subscribe((res: ResponseWrapper) => { this.worktypes = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
     }
 
     clear() {
@@ -69,6 +94,22 @@ export class WorkDialogComponent implements OnInit {
 
     private onError(error) {
         this.alertService.error(error.message, null, null);
+    }
+
+    trackWorkerById(index: number, item: Worker) {
+        return item.id;
+    }
+
+    trackCustomerById(index: number, item: Customer) {
+        return item.id;
+    }
+
+    trackAddressById(index: number, item: Address) {
+        return item.id;
+    }
+
+    trackWorkTypeById(index: number, item: WorkType) {
+        return item.id;
     }
 }
 

@@ -22,9 +22,9 @@
             "price": "Price",
             "order": "Order",
             "urlName": "Url Name",
-            "works": "Works",
             "categories": "Categories",
-            "workers": "Workers"
+            "workers": "Workers",
+            "works": "Works"
         }
     }
 }

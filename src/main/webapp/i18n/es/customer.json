@@ -17,8 +17,9 @@
             },
             "phone": "Phone",
             "user": "User",
+            "addresses": "Addresses",
             "works": "Works",
-            "addresses": "Addresses"
+            "confirmations": "Confirmations"
         }
     }
 }

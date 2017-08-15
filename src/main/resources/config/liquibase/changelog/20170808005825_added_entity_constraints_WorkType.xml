@@ -8,12 +8,6 @@
     -->
     <changeSet id="20170808005825-2" author="jhipster">
         
-        <addForeignKeyConstraint baseColumnNames="works_id"
-                                 baseTableName="work_type"
-                                 constraintName="fk_work_type_works_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="work"/>
-
         <addForeignKeyConstraint baseColumnNames="work_types_id"
                                  baseTableName="work_type_categories"
                                  constraintName="fk_work_type_categories_work_types_id"

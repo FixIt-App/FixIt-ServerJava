@@ -31,12 +31,17 @@ public class Customer implements Serializable {
     @JoinColumn(unique = true)
     private User user;
 
-    @ManyToOne
-    private Work works;
-
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     private Set<Address> addresses = new HashSet<>();
+
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    private Set<Work> works = new HashSet<>();
+
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    private Set<Confirmation> confirmations = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -72,19 +77,6 @@ public class Customer implements Serializable {
         this.user = user;
     }
 
-    public Work getWorks() {
-        return works;
-    }
-
-    public Customer works(Work work) {
-        this.works = work;
-        return this;
-    }
-
-    public void setWorks(Work work) {
-        this.works = work;
-    }
-
     public Set<Address> getAddresses() {
         return addresses;
     }
@@ -108,6 +100,56 @@ public class Customer implements Serializable {
 
     public void setAddresses(Set<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public Set<Work> getWorks() {
+        return works;
+    }
+
+    public Customer works(Set<Work> works) {
+        this.works = works;
+        return this;
+    }
+
+    public Customer addWorks(Work work) {
+        this.works.add(work);
+        work.setCustomer(this);
+        return this;
+    }
+
+    public Customer removeWorks(Work work) {
+        this.works.remove(work);
+        work.setCustomer(null);
+        return this;
+    }
+
+    public void setWorks(Set<Work> works) {
+        this.works = works;
+    }
+
+    public Set<Confirmation> getConfirmations() {
+        return confirmations;
+    }
+
+    public Customer confirmations(Set<Confirmation> confirmations) {
+        this.confirmations = confirmations;
+        return this;
+    }
+
+    public Customer addConfirmations(Confirmation confirmation) {
+        this.confirmations.add(confirmation);
+        confirmation.setCustomer(this);
+        return this;
+    }
+
+    public Customer removeConfirmations(Confirmation confirmation) {
+        this.confirmations.remove(confirmation);
+        confirmation.setCustomer(null);
+        return this;
+    }
+
+    public void setConfirmations(Set<Confirmation> confirmations) {
+        this.confirmations = confirmations;
     }
 
     @Override

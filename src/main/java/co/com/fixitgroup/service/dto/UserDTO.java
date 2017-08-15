@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.*;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,7 @@ public class UserDTO {
 
     private Instant lastModifiedDate;
 
-    private Set<String> authorities;
+    private Set<String> authorities = new HashSet<>();
 
     public UserDTO() {
         // Empty constructor needed for Jackson.

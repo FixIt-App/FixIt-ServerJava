@@ -1,0 +1,43 @@
+
+<div *ngIf="confirmation">
+    <h2><span jhiTranslate="fixItApp.confirmation.detail.title">Confirmation</span> {{confirmation.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="fixItApp.confirmation.type">Type</span></dt>
+        <dd>
+            <span jhiTranslate="{{'fixItApp.CONFIRMATION_TYPE.' + confirmation.type}}">{{confirmation.type}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.confirmation.expires">Expires</span></dt>
+        <dd>
+            <span>{{confirmation.expires | date:'medium'}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.confirmation.code">Code</span></dt>
+        <dd>
+            <span>{{confirmation.code}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.confirmation.state">State</span></dt>
+        <dd>
+            <span>{{confirmation.state}}</span>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.confirmation.customer">Customer</span></dt>
+        <dd>
+            <div *ngIf="confirmation.customer">
+                <a [routerLink]="['/customer', confirmation.customer?.id]">{{confirmation.customer?.id}}</a>
+            </div>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            (click)="previousState()"
+            class="btn btn-info">
+        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button"
+            [routerLink]="['/', { outlets: { popup: 'confirmation/'+ confirmation.id + '/edit'} }]"
+            replaceUrl="true"
+            class="btn btn-primary">
+        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+    </button>
+</div>

@@ -16,9 +16,9 @@ export class WorkType implements BaseEntity {
         public price?: number,
         public order?: number,
         public urlName?: string,
-        public works?: BaseEntity,
         public categories?: BaseEntity[],
         public workers?: BaseEntity[],
+        public works?: BaseEntity[],
     ) {
     }
 }

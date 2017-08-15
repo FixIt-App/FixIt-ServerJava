@@ -7,7 +7,7 @@ export class Worker implements BaseEntity {
         public phone?: string,
         public rh?: string,
         public user?: User,
-        public works?: BaseEntity,
+        public works?: BaseEntity[],
         public workTypes?: BaseEntity[],
     ) {
     }

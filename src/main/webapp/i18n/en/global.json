@@ -13,6 +13,7 @@
                 "workTypeCategory": "Work Type Category",
                 "work": "Work",
                 "workType": "Work Type",
+                "confirmation": "Confirmation",
                 "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
             },
             "account": {

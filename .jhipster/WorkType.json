@@ -2,12 +2,6 @@
     "fluentMethods": true,
     "relationships": [
         {
-            "relationshipType": "many-to-one",
-            "relationshipName": "works",
-            "otherEntityName": "work",
-            "otherEntityField": "id"
-        },
-        {
             "relationshipType": "many-to-many",
             "otherEntityRelationshipName": "workTypes",
             "relationshipName": "categories",
@@ -22,6 +16,12 @@
             "otherEntityName": "worker",
             "otherEntityField": "id",
             "ownerSide": true
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "works",
+            "otherEntityName": "work",
+            "otherEntityRelationshipName": "worktype"
         }
     ],
     "fields": [

@@ -10,7 +10,6 @@ import { Customer } from './customer.model';
 import { CustomerPopupService } from './customer-popup.service';
 import { CustomerService } from './customer.service';
 import { User, UserService } from '../../shared';
-import { Work, WorkService } from '../work';
 import { ResponseWrapper } from '../../shared';
 
 @Component({
@@ -24,14 +23,11 @@ export class CustomerDialogComponent implements OnInit {
 
     users: User[];
 
-    works: Work[];
-
     constructor(
         public activeModal: NgbActiveModal,
         private alertService: JhiAlertService,
         private customerService: CustomerService,
         private userService: UserService,
-        private workService: WorkService,
         private eventManager: JhiEventManager
     ) {
     }
@@ -40,8 +36,6 @@ export class CustomerDialogComponent implements OnInit {
         this.isSaving = false;
         this.userService.query()
             .subscribe((res: ResponseWrapper) => { this.users = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
-        this.workService.query()
-            .subscribe((res: ResponseWrapper) => { this.works = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
     }
 
     clear() {
@@ -85,10 +79,6 @@ export class CustomerDialogComponent implements OnInit {
     }
 
     trackUserById(index: number, item: User) {
-        return item.id;
-    }
-
-    trackWorkById(index: number, item: Work) {
         return item.id;
     }
 }

@@ -1,5 +1,10 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.domain.User;
+import co.com.fixitgroup.repository.UserRepository;
+import co.com.fixitgroup.security.SecurityUtils;
+import co.com.fixitgroup.service.CustomerService;
+import co.com.fixitgroup.service.dto.CustomerDTO;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Customer;
 
@@ -28,7 +33,6 @@ import java.util.Optional;
  * REST controller for managing Customer.
  */
 @RestController
-@RequestMapping("/api")
 public class CustomerResource {
 
     private final Logger log = LoggerFactory.getLogger(CustomerResource.class);
@@ -37,8 +41,14 @@ public class CustomerResource {
 
     private final CustomerRepository customerRepository;
 
-    public CustomerResource(CustomerRepository customerRepository) {
+    private final CustomerService customerService;
+
+    private final UserRepository userRepository;
+
+    public CustomerResource(CustomerRepository customerRepository, CustomerService customerService, UserRepository userRepository) {
         this.customerRepository = customerRepository;
+        this.customerService = customerService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -48,7 +58,24 @@ public class CustomerResource {
      * @return the ResponseEntity with status 201 (Created) and with body the new customer, or with status 400 (Bad Request) if the customer has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PostMapping("/customers")
+    @PostMapping("/api/v2/customers")
+    @Timed
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody CustomerDTO customer) throws URISyntaxException {
+        log.debug("REST request to save Customer : {}", customer);
+        Customer result = customerService.createCustomer(customer);
+        return ResponseEntity.created(new URI("/api/customers/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    /**
+     * POST  /customers : Create a new customer.
+     *
+     * @param customer the customer to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new customer, or with status 400 (Bad Request) if the customer has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/api/customers")
     @Timed
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
         log.debug("REST request to save Customer : {}", customer);
@@ -65,22 +92,56 @@ public class CustomerResource {
      * PUT  /customers : Updates an existing customer.
      *
      * @param customer the customer to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated customer,
+     * @return the ReºsponseEntity with status 200 (OK) and with body the updated customer,
      * or with status 400 (Bad Request) if the customer is not valid,
      * or with status 500 (Internal Server Error) if the customer couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
-    @PutMapping("/customers")
+    @PutMapping("/api/customers")
     @Timed
     public ResponseEntity<Customer> updateCustomer(@Valid @RequestBody Customer customer) throws URISyntaxException {
         log.debug("REST request to update Customer : {}", customer);
         if (customer.getId() == null) {
-            return createCustomer(customer);
+            return new ResponseEntity<Customer>(HttpStatus.BAD_REQUEST);
         }
         Customer result = customerRepository.save(customer);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, customer.getId().toString()))
             .body(result);
+    }
+
+    @GetMapping("/api/customer/email/{email}/available")
+    @Timed
+    public ResponseEntity<Boolean> isEmailAvalable(@PathVariable String email) {
+        Optional<User> userOptional = userRepository.findOneByLogin(email);
+        if(userOptional.isPresent()){
+            return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+        }
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/api/customer/phone/{phone}/available")
+    @Timed
+    public ResponseEntity<Boolean> isPhoneAvalable(@PathVariable String phone) {
+        Optional<Customer> customerOptional = customerRepository.findOneByPhoneEquals(phone);
+        if(customerOptional.isPresent()){
+            return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+        }
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+    }
+
+    @GetMapping("/api/customer/authenticated")
+    @Timed
+    public ResponseEntity<Customer> getCurrentCustomer() {
+        String login = SecurityUtils.getCurrentUserLogin();
+        Optional<Customer> customerOptional = customerRepository.getCustomerByUser(login);
+        if (customerOptional.isPresent()) {
+            return new ResponseEntity<Customer>(
+                customerOptional.get(), HttpStatus.OK
+            );
+        }
+        return new ResponseEntity<Customer>(HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -89,7 +150,7 @@ public class CustomerResource {
      * @param pageable the pagination information
      * @return the ResponseEntity with status 200 (OK) and the list of customers in body
      */
-    @GetMapping("/customers")
+    @GetMapping("/api/customers")
     @Timed
     public ResponseEntity<List<Customer>> getAllCustomers(@ApiParam Pageable pageable) {
         log.debug("REST request to get a page of Customers");
@@ -104,7 +165,7 @@ public class CustomerResource {
      * @param id the id of the customer to retrieve
      * @return the ResponseEntity with status 200 (OK) and with body the customer, or with status 404 (Not Found)
      */
-    @GetMapping("/customers/{id}")
+    @GetMapping("/api/customers/{id}")
     @Timed
     public ResponseEntity<Customer> getCustomer(@PathVariable Long id) {
         log.debug("REST request to get Customer : {}", id);
@@ -118,7 +179,7 @@ public class CustomerResource {
      * @param id the id of the customer to delete
      * @return the ResponseEntity with status 200 (OK)
      */
-    @DeleteMapping("/customers/{id}")
+    @DeleteMapping("/api/customers/{id}")
     @Timed
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         log.debug("REST request to delete Customer : {}", id);

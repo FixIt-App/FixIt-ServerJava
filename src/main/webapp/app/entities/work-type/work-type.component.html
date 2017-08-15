@@ -24,7 +24,6 @@
             <th jhiSortBy="price"><span jhiTranslate="fixItApp.workType.price">Price</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="order"><span jhiTranslate="fixItApp.workType.order">Order</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="urlName"><span jhiTranslate="fixItApp.workType.urlName">Url Name</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="works.id"><span jhiTranslate="fixItApp.workType.works">Works</span> <span class="fa fa-sort"></span></th>
             <th></th>
             </tr>
             </thead>
@@ -38,11 +37,6 @@
                 <td>{{workType.price}}</td>
                 <td>{{workType.order}}</td>
                 <td>{{workType.urlName}}</td>
-                <td>
-                    <div *ngIf="workType.works">
-                        <a [routerLink]="['../work', workType.works?.id ]" >{{workType.works?.id}}</a>
-                    </div>
-                </td>
                 <td class="text-right">
                     <div class="btn-group flex-btn-group-container">
                         <button type="submit"

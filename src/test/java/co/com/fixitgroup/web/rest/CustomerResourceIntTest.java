@@ -3,9 +3,18 @@ package co.com.fixitgroup.web.rest;
 import co.com.fixitgroup.FixItApp;
 
 import co.com.fixitgroup.domain.Customer;
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.repository.CustomerRepository;
+import co.com.fixitgroup.repository.UserRepository;
+import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.JWTConfigurer;
+import co.com.fixitgroup.security.jwt.TokenProvider;
+import co.com.fixitgroup.service.CustomerService;
+import co.com.fixitgroup.service.dto.CustomerDTO;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import co.com.fixitgroup.web.rest.vm.ManagedUserVM;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,12 +24,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,9 +53,13 @@ public class CustomerResourceIntTest {
 
     private static final String DEFAULT_PHONE = "AAAAAAAAAA";
     private static final String UPDATED_PHONE = "BBBBBBBBBB";
+    private static final String DEFAULT_LOGIN = "example@mail.com";
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -53,16 +71,26 @@ public class CustomerResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
     private EntityManager em;
+
+    @Autowired
+    private CustomerService customerService;
 
     private MockMvc restCustomerMockMvc;
 
     private Customer customer;
 
+    private User user;
+
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        CustomerResource customerResource = new CustomerResource(customerRepository);
+        SecurityContextHolder.getContext().setAuthentication(null);
+        CustomerResource customerResource = new CustomerResource(customerRepository, customerService, userRepository);
         this.restCustomerMockMvc = MockMvcBuilders.standaloneSetup(customerResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -83,12 +111,112 @@ public class CustomerResourceIntTest {
 
     @Before
     public void initTest() {
+        user = UserResourceIntTest.createEntity(em);
         customer = createEntity(em);
     }
 
     @Test
     @Transactional
-    public void createCustomer() throws Exception {
+    public void getCurrentCustomerTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+        restCustomerMockMvc
+            .perform(get("/api/customer/authenticated")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @Transactional
+    public void isPhoneAvailableTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/phone/blabla/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    @Transactional
+    public void isPhoneNotAvailableTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/phone/".concat(DEFAULT_PHONE).concat("/available"))
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    @Transactional
+    public void isEmailAvailableTest() throws Exception {
+        userRepository.saveAndFlush(user);
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/email/blabla/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assert.assertEquals(result.getResponse().getContentAsString(), "true");
+    }
+
+    @Test
+    @Transactional
+    public void isEmailNotAvailableTest() throws Exception {
+        userRepository.saveAndFlush(user);
+        MvcResult result = restCustomerMockMvc
+            .perform(get("/api/customer/email/johndoe/available")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assert.assertEquals(result.getResponse().getContentAsString(), "false");
+    }
+
+    @Test
+    @Transactional
+    public void getCurrentCustomerNoAuth() throws Exception {
+        userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            "randomUnknown", user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+        restCustomerMockMvc
+            .perform(get("/api/customer/authenticated")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void createCustomerV1() throws Exception {
         int databaseSizeBeforeCreate = customerRepository.findAll().size();
 
         // Create the Customer
@@ -121,6 +249,29 @@ public class CustomerResourceIntTest {
         // Validate the Alice in the database
         List<Customer> customerList = customerRepository.findAll();
         assertThat(customerList).hasSize(databaseSizeBeforeCreate);
+    }
+
+    @Test
+    @Transactional
+    public void createCustomer() throws Exception {
+        int databaseSizeBeforeCreate = customerRepository.findAll().size();
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setPhone(customer.getPhone());
+        User user = UserResourceIntTest.createEntity(em);
+        ManagedUserVM userDTO = new ManagedUserVM(user);
+        userDTO.setPassword("1233444213");
+        customerDTO.setUser(userDTO);
+        // Create the Customer
+        restCustomerMockMvc.perform(post("/api/v2/customers")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(customerDTO)))
+            .andExpect(status().isCreated());
+
+        // Validate the Customer in the database
+        List<Customer> customerList = customerRepository.findAll();
+        assertThat(customerList).hasSize(databaseSizeBeforeCreate + 1);
+        Customer testCustomer = customerList.get(customerList.size() - 1);
+        assertThat(testCustomer.getPhone()).isEqualTo(DEFAULT_PHONE);
     }
 
     @Test
@@ -159,6 +310,8 @@ public class CustomerResourceIntTest {
     @Transactional
     public void getCustomer() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(user);
+        customer.setUser(user);
         customerRepository.saveAndFlush(customer);
 
         // Get the customer
@@ -199,24 +352,6 @@ public class CustomerResourceIntTest {
         assertThat(customerList).hasSize(databaseSizeBeforeUpdate);
         Customer testCustomer = customerList.get(customerList.size() - 1);
         assertThat(testCustomer.getPhone()).isEqualTo(UPDATED_PHONE);
-    }
-
-    @Test
-    @Transactional
-    public void updateNonExistingCustomer() throws Exception {
-        int databaseSizeBeforeUpdate = customerRepository.findAll().size();
-
-        // Create the Customer
-
-        // If the entity doesn't have an ID, it will be created instead of just being updated
-        restCustomerMockMvc.perform(put("/api/customers")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(customer)))
-            .andExpect(status().isCreated());
-
-        // Validate the Customer in the database
-        List<Customer> customerList = customerRepository.findAll();
-        assertThat(customerList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test

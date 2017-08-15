@@ -10,7 +10,7 @@ export class Address implements BaseEntity {
         public latitude?: string,
         public longitude?: string,
         public customer?: BaseEntity,
-        public works?: BaseEntity,
+        public works?: BaseEntity[],
     ) {
     }
 }

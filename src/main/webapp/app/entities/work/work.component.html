@@ -20,6 +20,10 @@
             <th jhiSortBy="time"><span jhiTranslate="fixItApp.work.time">Time</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="description"><span jhiTranslate="fixItApp.work.description">Description</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="asap"><span jhiTranslate="fixItApp.work.asap">Asap</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="worker.id"><span jhiTranslate="fixItApp.work.worker">Worker</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="customer.id"><span jhiTranslate="fixItApp.work.customer">Customer</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="address.id"><span jhiTranslate="fixItApp.work.address">Address</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="worktype.id"><span jhiTranslate="fixItApp.work.worktype">Worktype</span> <span class="fa fa-sort"></span></th>
             <th></th>
             </tr>
             </thead>
@@ -29,6 +33,26 @@
                 <td>{{work.time | date:'medium'}}</td>
                 <td>{{work.description}}</td>
                 <td>{{work.asap}}</td>
+                <td>
+                    <div *ngIf="work.worker">
+                        <a [routerLink]="['../worker', work.worker?.id ]" >{{work.worker?.id}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="work.customer">
+                        <a [routerLink]="['../customer', work.customer?.id ]" >{{work.customer?.id}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="work.address">
+                        <a [routerLink]="['../address', work.address?.id ]" >{{work.address?.id}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="work.worktype">
+                        <a [routerLink]="['../work-type', work.worktype?.id ]" >{{work.worktype?.id}}</a>
+                    </div>
+                </td>
                 <td class="text-right">
                     <div class="btn-group flex-btn-group-container">
                         <button type="submit"

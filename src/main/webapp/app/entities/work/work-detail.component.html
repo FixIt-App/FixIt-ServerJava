@@ -16,6 +16,30 @@
         <dd>
             <span>{{work.asap}}</span>
         </dd>
+        <dt><span jhiTranslate="fixItApp.work.worker">Worker</span></dt>
+        <dd>
+            <div *ngIf="work.worker">
+                <a [routerLink]="['/worker', work.worker?.id]">{{work.worker?.id}}</a>
+            </div>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.work.customer">Customer</span></dt>
+        <dd>
+            <div *ngIf="work.customer">
+                <a [routerLink]="['/customer', work.customer?.id]">{{work.customer?.id}}</a>
+            </div>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.work.address">Address</span></dt>
+        <dd>
+            <div *ngIf="work.address">
+                <a [routerLink]="['/address', work.address?.id]">{{work.address?.id}}</a>
+            </div>
+        </dd>
+        <dt><span jhiTranslate="fixItApp.work.worktype">Worktype</span></dt>
+        <dd>
+            <div *ngIf="work.worktype">
+                <a [routerLink]="['/work-type', work.worktype?.id]">{{work.worktype?.id}}</a>
+            </div>
+        </dd>
     </dl>
 
     <button type="submit"

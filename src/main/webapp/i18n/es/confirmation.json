@@ -1,0 +1,25 @@
+{
+    "fixItApp": {
+        "confirmation" : {
+            "home": {
+                "title": "Confirmations",
+                "createLabel": "Crear nuevo Confirmation",
+                "createOrEditLabel": "Crear o editar Confirmation"
+            },
+            "created": "Un nuevo Confirmation ha sido creado con el identificador {{ param }}",
+            "updated": "Un Confirmation ha sido actualizado con el identificador {{ param }}",
+            "deleted": "Un Confirmation ha sido eliminado con el identificador {{ param }}",
+            "delete": {
+                "question": "¿Seguro que quiere eliminar Confirmation {{ id }}?"
+            },
+            "detail": {
+                "title": "Confirmation"
+            },
+            "type": "Type",
+            "expires": "Expires",
+            "code": "Code",
+            "state": "State",
+            "customer": "Customer"
+        }
+    }
+}

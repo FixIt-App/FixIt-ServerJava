@@ -24,7 +24,6 @@
             <th jhiSortBy="latitude"><span jhiTranslate="fixItApp.address.latitude">Latitude</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="longitude"><span jhiTranslate="fixItApp.address.longitude">Longitude</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="customer.id"><span jhiTranslate="fixItApp.address.customer">Customer</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="works.id"><span jhiTranslate="fixItApp.address.works">Works</span> <span class="fa fa-sort"></span></th>
             <th></th>
             </tr>
             </thead>
@@ -40,11 +39,6 @@
                 <td>
                     <div *ngIf="address.customer">
                         <a [routerLink]="['../customer', address.customer?.id ]" >{{address.customer?.id}}</a>
-                    </div>
-                </td>
-                <td>
-                    <div *ngIf="address.works">
-                        <a [routerLink]="['../work', address.works?.id ]" >{{address.works?.id}}</a>
                     </div>
                 </td>
                 <td class="text-right">
