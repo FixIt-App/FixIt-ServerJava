@@ -1,5 +1,6 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Address;
 
@@ -96,6 +97,25 @@ public class AddressResource {
         Page<Address> page = addressRepository.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/addresses");
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    }
+
+
+    /**
+     * GET  /addresses : get all the addresses.
+     *
+     * @param pageable the pagination information
+     * @return the ResponseEntity with status 200 (OK) and the list of addresses in body
+     */
+    @GetMapping("/myaddresses")
+    @Timed
+    public ResponseEntity<List<Address>> getMYAddresses() {
+        log.debug("REST request to get a page of MyAddresses");
+        String login = SecurityUtils.getCurrentUserLogin();
+        if(login == null) {
+            return new ResponseEntity<List<Address>>(HttpStatus.UNAUTHORIZED);
+        }
+        List<Address> addresses = addressRepository.getCustomerAddresses(login);
+        return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
     /**

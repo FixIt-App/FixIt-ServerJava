@@ -3,9 +3,17 @@ package co.com.fixitgroup.web.rest;
 import co.com.fixitgroup.FixItApp;
 
 import co.com.fixitgroup.domain.Address;
+import co.com.fixitgroup.domain.Customer;
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.repository.AddressRepository;
+import co.com.fixitgroup.repository.CustomerRepository;
+import co.com.fixitgroup.repository.UserRepository;
+import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,12 +23,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +72,12 @@ public class AddressResourceIntTest {
     private AddressRepository addressRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -68,11 +87,18 @@ public class AddressResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
     private EntityManager em;
 
     private MockMvc restAddressMockMvc;
 
     private Address address;
+
+    private Customer customer;
+
+    private User user;
 
     @Before
     public void setup() {
@@ -103,7 +129,54 @@ public class AddressResourceIntTest {
 
     @Before
     public void initTest() {
+        user = UserResourceIntTest.createEntity(em);
         address = createEntity(em);
+        customer = CustomerResourceIntTest.createEntity(em);
+    }
+
+    @Test
+    @Transactional
+    public void getMyAddressesUnAuthorizedTest() throws Exception {
+
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+
+        MvcResult result = restAddressMockMvc
+            .perform(get("/api/myaddresses")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isUnauthorized()).andReturn();
+    }
+
+    @Test
+    @Transactional
+    public void getMyAddressesSuccessfulTest() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+        address.setCustomer(customer);
+        addressRepository.saveAndFlush(address);
+
+        Address second = createEntity(em);
+        second.setCustomer(customer);
+        addressRepository.saveAndFlush(second);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+
+
+        MvcResult result = restAddressMockMvc
+            .perform(get("/api/myaddresses")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk()).andReturn();
+
+        ObjectMapper mapper = new ObjectMapper();
+        Address[] resultObject = mapper.readValue(result.getResponse().getContentAsString(),
+            Address[].class);
+        Assert.assertEquals(resultObject.length, 2);
     }
 
     @Test
