@@ -31,8 +31,7 @@ public class WorkTypeCategory implements Serializable {
     @Column(name = "jhi_order", nullable = false)
     private Integer order;
 
-    @ManyToMany(mappedBy = "categories")
-    @JsonIgnore
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
     private Set<WorkType> workTypes = new HashSet<>();
 
     public Long getId() {
