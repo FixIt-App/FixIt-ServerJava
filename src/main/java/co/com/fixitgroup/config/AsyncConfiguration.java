@@ -9,6 +9,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -17,6 +18,7 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableAsync
 @EnableScheduling
+@Profile("!test")
 public class AsyncConfiguration implements AsyncConfigurer {
 
     private final Logger log = LoggerFactory.getLogger(AsyncConfiguration.class);

@@ -5,12 +5,17 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.*;
 
+import java.util.List;
+
 
 /**
  * Spring Data JPA repository for the Address entity.
  */
-@SuppressWarnings("unused")
 @Repository
 public interface AddressRepository extends JpaRepository<Address,Long> {
-    
+
+
+    @Query("SELECT a FROM Address a JOIN FETCH a.customer c JOIN FETCH c.user u WHERE u.login = ?1")
+    List<Address> getCustomerAddresses(String login);
+
 }
