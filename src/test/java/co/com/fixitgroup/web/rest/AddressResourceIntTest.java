@@ -9,6 +9,7 @@ import co.com.fixitgroup.repository.AddressRepository;
 import co.com.fixitgroup.repository.CustomerRepository;
 import co.com.fixitgroup.repository.UserRepository;
 import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.JWTConfigurer;
 import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
@@ -103,7 +104,7 @@ public class AddressResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        AddressResource addressResource = new AddressResource(addressRepository);
+        AddressResource addressResource = new AddressResource(addressRepository, customerRepository);
         this.restAddressMockMvc = MockMvcBuilders.standaloneSetup(addressResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -170,7 +171,8 @@ public class AddressResourceIntTest {
 
         MvcResult result = restAddressMockMvc
             .perform(get("/api/myaddresses")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8))
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
             .andExpect(status().isOk()).andReturn();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -178,6 +180,66 @@ public class AddressResourceIntTest {
             Address[].class);
         Assert.assertEquals(resultObject.length, 2);
     }
+
+
+    @Test
+    @Transactional
+    public void createAddressVersion2() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+        int databaseSizeBeforeCreate = addressRepository.findAll().size();
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+
+        // Create the Address7v2
+        restAddressMockMvc.perform(post("/api/v2/addresses")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(address))
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isCreated());
+
+        // Validate the Address in the database
+        List<Address> addressList = addressRepository.findAll();
+        assertThat(addressList).hasSize(databaseSizeBeforeCreate + 1);
+        Address testAddress = addressList.get(addressList.size() - 1);
+        assertThat(testAddress.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testAddress.getAddress()).isEqualTo(DEFAULT_ADDRESS);
+        assertThat(testAddress.getCity()).isEqualTo(DEFAULT_CITY);
+        assertThat(testAddress.getCountry()).isEqualTo(DEFAULT_COUNTRY);
+        assertThat(testAddress.getLatitude()).isEqualTo(DEFAULT_LATITUDE);
+        assertThat(testAddress.getLongitude()).isEqualTo(DEFAULT_LONGITUDE);
+    }
+
+
+    @Test
+    @Transactional
+    public void createAddressVersion2ShouldFailIfCustomerIsSent() throws Exception {
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+        int databaseSizeBeforeCreate = addressRepository.findAll().size();
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+        address.setCustomer(new Customer());
+        // Create the Address
+        restAddressMockMvc.perform(post("/api/v2/addresses")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(address))
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isBadRequest());
+    }
+
 
     @Test
     @Transactional
@@ -373,6 +435,103 @@ public class AddressResourceIntTest {
         // Get the address
         restAddressMockMvc.perform(get("/api/addresses/{id}", Long.MAX_VALUE))
             .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @Transactional
+    public void updateAddressV2() throws Exception {
+        // Initialize the database
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customer = customerRepository.saveAndFlush(customer);
+        address.setCustomer(customer);
+        addressRepository.saveAndFlush(address);
+        int databaseSizeBeforeUpdate = addressRepository.findAll().size();
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+
+
+        // Update the address
+        Address updatedAddress = addressRepository.findOne(address.getId());
+        updatedAddress
+            .name(UPDATED_NAME)
+            .address(UPDATED_ADDRESS)
+            .city(UPDATED_CITY)
+            .country(UPDATED_COUNTRY)
+            .latitude(UPDATED_LATITUDE)
+            .longitude(UPDATED_LONGITUDE);
+
+        restAddressMockMvc.perform(put("/api/v2/addresses")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(updatedAddress))
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isOk());
+
+        // Validate the Address in the database
+        List<Address> addressList = addressRepository.findAll();
+        assertThat(addressList).hasSize(databaseSizeBeforeUpdate);
+        Address testAddress = addressList.get(addressList.size() - 1);
+        assertThat(testAddress.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testAddress.getAddress()).isEqualTo(UPDATED_ADDRESS);
+        assertThat(testAddress.getCity()).isEqualTo(UPDATED_CITY);
+        assertThat(testAddress.getCountry()).isEqualTo(UPDATED_COUNTRY);
+        assertThat(testAddress.getLatitude()).isEqualTo(UPDATED_LATITUDE);
+        assertThat(testAddress.getLongitude()).isEqualTo(UPDATED_LONGITUDE);
+    }
+
+
+
+    @Test
+    @Transactional
+    public void updateAddressV2ShouldFailIfUserDoesntCorrespond() throws Exception {
+        // Initialize the database
+        address = createEntity(em);
+        addressRepository.saveAndFlush(address);
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customerRepository.saveAndFlush(customer);
+        int databaseSizeBeforeUpdate = addressRepository.findAll().size();
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.createToken(authentication, false);
+
+        // Update the address
+        Address updatedAddress = new Address();
+        updatedAddress.setId(address.getId());
+        updatedAddress
+            .name(UPDATED_NAME)
+            .address(UPDATED_ADDRESS)
+            .city(UPDATED_CITY)
+            .country(UPDATED_COUNTRY)
+            .latitude(UPDATED_LATITUDE)
+            .longitude(UPDATED_LONGITUDE);
+
+        restAddressMockMvc.perform(put("/api/v2/addresses")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(updatedAddress))
+            .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isForbidden());
+
+        // Validate the Address in the database
+        List<Address> addressList = addressRepository.findAll();
+        assertThat(addressList).hasSize(databaseSizeBeforeUpdate);
+        Address testAddress = addressList.get(addressList.size() - 1);
+        assertThat(testAddress.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testAddress.getAddress()).isEqualTo(DEFAULT_ADDRESS);
+        assertThat(testAddress.getCity()).isEqualTo(DEFAULT_CITY);
+        assertThat(testAddress.getCountry()).isEqualTo(DEFAULT_COUNTRY);
+        assertThat(testAddress.getLatitude()).isEqualTo(DEFAULT_LATITUDE);
+        assertThat(testAddress.getLongitude()).isEqualTo(DEFAULT_LONGITUDE);
     }
 
     @Test
