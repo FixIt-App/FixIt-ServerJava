@@ -51,6 +51,23 @@
                 </small>
             </div>
         </div>
+        <div class="form-group">
+            <label class="form-control-label" jhiTranslate="fixItApp.work.state" for="field_state">State</label>
+            <select class="form-control" name="state" [(ngModel)]="work.state" id="field_state"  required>
+                <option value="ORDERED" jhiTranslate="fixItApp.WorkState.ORDERED">ORDERED</option>
+                <option value="SCHEDULED" jhiTranslate="fixItApp.WorkState.SCHEDULED">SCHEDULED</option>
+                <option value="FINISHED" jhiTranslate="fixItApp.WorkState.FINISHED">FINISHED</option>
+                <option value="FAILED" jhiTranslate="fixItApp.WorkState.FAILED">FAILED</option>
+                <option value="CANCELED" jhiTranslate="fixItApp.WorkState.CANCELED">CANCELED</option>
+                <option value="IN_PROGRESS" jhiTranslate="fixItApp.WorkState.IN_PROGRESS">IN_PROGRESS</option>
+            </select>
+            <div [hidden]="!(editForm.controls.state?.dirty && editForm.controls.state?.invalid)">
+                <small class="form-text text-danger"
+                   [hidden]="!editForm.controls.state?.errors?.required" jhiTranslate="entity.validation.required">
+                   This field is required.
+                </small>
+            </div>
+        </div>
 
         <div class="form-group">
             <label jhiTranslate="fixItApp.work.worker" for="field_worker">Worker</label>

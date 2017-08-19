@@ -1,5 +1,6 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.domain.enumeration.WorkState;
 import co.com.fixitgroup.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Work;
@@ -23,8 +24,7 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * REST controller for managing Work.
@@ -92,11 +92,18 @@ public class WorkResource {
      */
     @GetMapping("/myWorks")
     @Timed
-    public ResponseEntity<List<Work>> getMyWorks() {
+    public ResponseEntity<List<Work>> getMyWorks(@RequestParam(value = "state", required = false, defaultValue = "")  String states) {
+        Set<WorkState> validStates = new HashSet<>();
+
+        if(Objects.isNull(states) || "".equals(states)){
+            validStates.addAll(Arrays.asList(WorkState.values())); // All statues are valid
+        }else{
+            validStates = WorkState.findAll(states.split(","));
+        }
         log.debug("REST request to get a page of Works");
         String user = SecurityUtils.getCurrentUserLogin();
         if(user == null){ return new ResponseEntity(HttpStatus.UNAUTHORIZED);}
-        List<Work> works = workRepository.getMyWorks(user);
+        List<Work> works = workRepository.getMyWorks(user, validStates);
         return new ResponseEntity<>(works, HttpStatus.OK);
     }
 

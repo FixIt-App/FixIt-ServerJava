@@ -47,6 +47,14 @@
             "fieldValidateRules": [
                 "required"
             ]
+        },
+        {
+            "fieldName": "state",
+            "fieldType": "WorkState",
+            "fieldValues": "ORDERED,SCHEDULED,FINISHED,FAILED,CANCELED,IN_PROGRESS",
+            "fieldValidateRules": [
+                "required"
+            ]
         }
     ],
     "changelogDate": "20170808005824",

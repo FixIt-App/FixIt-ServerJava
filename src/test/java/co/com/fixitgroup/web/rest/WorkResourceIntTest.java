@@ -48,6 +48,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import co.com.fixitgroup.domain.enumeration.WorkState;
 /**
  * Test class for the WorkResource REST controller.
  *
@@ -65,6 +66,9 @@ public class WorkResourceIntTest {
 
     private static final Boolean DEFAULT_ASAP = false;
     private static final Boolean UPDATED_ASAP = true;
+
+    private static final WorkState DEFAULT_STATE = WorkState.ORDERED;
+    private static final WorkState UPDATED_STATE = WorkState.SCHEDULED;
 
     @Autowired
     private WorkRepository workRepository;
@@ -117,7 +121,8 @@ public class WorkResourceIntTest {
         Work work = new Work()
             .time(DEFAULT_TIME)
             .description(DEFAULT_DESCRIPTION)
-            .asap(DEFAULT_ASAP);
+            .asap(DEFAULT_ASAP)
+            .state(DEFAULT_STATE);
         return work;
     }
 
@@ -144,6 +149,7 @@ public class WorkResourceIntTest {
         assertThat(testWork.getTime()).isEqualTo(DEFAULT_TIME);
         assertThat(testWork.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
         assertThat(testWork.isAsap()).isEqualTo(DEFAULT_ASAP);
+        assertThat(testWork.getState()).isEqualTo(DEFAULT_STATE);
     }
 
     @Test
@@ -221,6 +227,24 @@ public class WorkResourceIntTest {
 
     @Test
     @Transactional
+    public void checkStateIsRequired() throws Exception {
+        int databaseSizeBeforeTest = workRepository.findAll().size();
+        // set the field null
+        work.setState(null);
+
+        // Create the Work, which fails.
+
+        restWorkMockMvc.perform(post("/api/works")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(work)))
+            .andExpect(status().isCreated());
+
+        List<Work> workList = workRepository.findAll();
+        assertThat(workList).hasSize(databaseSizeBeforeTest + 1);
+    }
+
+    @Test
+    @Transactional
     public void getAllWorks() throws Exception {
         // Initialize the database
         workRepository.saveAndFlush(work);
@@ -232,7 +256,8 @@ public class WorkResourceIntTest {
             .andExpect(jsonPath("$.[*].id").value(hasItem(work.getId().intValue())))
             .andExpect(jsonPath("$.[*].time").value(hasItem(sameInstant(DEFAULT_TIME))))
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION.toString())))
-            .andExpect(jsonPath("$.[*].asap").value(hasItem(DEFAULT_ASAP.booleanValue())));
+            .andExpect(jsonPath("$.[*].asap").value(hasItem(DEFAULT_ASAP.booleanValue())))
+            .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())));
     }
 
     @Test
@@ -288,7 +313,8 @@ public class WorkResourceIntTest {
             .andExpect(jsonPath("$.id").value(work.getId().intValue()))
             .andExpect(jsonPath("$.time").value(sameInstant(DEFAULT_TIME)))
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION.toString()))
-            .andExpect(jsonPath("$.asap").value(DEFAULT_ASAP.booleanValue()));
+            .andExpect(jsonPath("$.asap").value(DEFAULT_ASAP.booleanValue()))
+            .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()));
     }
 
     @Test
@@ -311,7 +337,8 @@ public class WorkResourceIntTest {
         updatedWork
             .time(UPDATED_TIME)
             .description(UPDATED_DESCRIPTION)
-            .asap(UPDATED_ASAP);
+            .asap(UPDATED_ASAP)
+            .state(UPDATED_STATE);
 
         restWorkMockMvc.perform(put("/api/works")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -325,6 +352,7 @@ public class WorkResourceIntTest {
         assertThat(testWork.getTime()).isEqualTo(UPDATED_TIME);
         assertThat(testWork.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
         assertThat(testWork.isAsap()).isEqualTo(UPDATED_ASAP);
+        assertThat(testWork.getState()).isEqualTo(UPDATED_STATE);
     }
 
     @Test

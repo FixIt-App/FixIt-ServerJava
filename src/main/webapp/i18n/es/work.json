@@ -18,6 +18,7 @@
             "time": "Time",
             "description": "Description",
             "asap": "Asap",
+            "state": "State",
             "worker": "Worker",
             "customer": "Customer",
             "address": "Address",
