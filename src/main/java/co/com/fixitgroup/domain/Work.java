@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
+import co.com.fixitgroup.domain.enumeration.WorkState;
+
 /**
  * A Work.
  */
@@ -32,6 +34,11 @@ public class Work implements Serializable {
     @NotNull
     @Column(name = "asap", nullable = false)
     private Boolean asap;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state", nullable = false)
+    private WorkState state = WorkState.ORDERED;
 
     @ManyToOne
     private Worker worker;
@@ -90,6 +97,19 @@ public class Work implements Serializable {
 
     public void setAsap(Boolean asap) {
         this.asap = asap;
+    }
+
+    public WorkState getState() {
+        return state;
+    }
+
+    public Work state(WorkState state) {
+        this.state = state;
+        return this;
+    }
+
+    public void setState(WorkState state) {
+        this.state = state;
     }
 
     public Worker getWorker() {
@@ -171,6 +191,7 @@ public class Work implements Serializable {
             ", time='" + getTime() + "'" +
             ", description='" + getDescription() + "'" +
             ", asap='" + isAsap() + "'" +
+            ", state='" + getState() + "'" +
             "}";
     }
 }

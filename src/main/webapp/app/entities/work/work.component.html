@@ -20,6 +20,7 @@
             <th jhiSortBy="time"><span jhiTranslate="fixItApp.work.time">Time</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="description"><span jhiTranslate="fixItApp.work.description">Description</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="asap"><span jhiTranslate="fixItApp.work.asap">Asap</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="state"><span jhiTranslate="fixItApp.work.state">State</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="worker.id"><span jhiTranslate="fixItApp.work.worker">Worker</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="customer.id"><span jhiTranslate="fixItApp.work.customer">Customer</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="address.id"><span jhiTranslate="fixItApp.work.address">Address</span> <span class="fa fa-sort"></span></th>
@@ -33,6 +34,7 @@
                 <td>{{work.time | date:'medium'}}</td>
                 <td>{{work.description}}</td>
                 <td>{{work.asap}}</td>
+                <td jhiTranslate="{{'fixItApp.WorkState.' + work.state}}">{{work.state}}</td>
                 <td>
                     <div *ngIf="work.worker">
                         <a [routerLink]="['../worker', work.worker?.id ]" >{{work.worker?.id}}</a>

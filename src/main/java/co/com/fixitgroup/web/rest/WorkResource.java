@@ -1,5 +1,7 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.domain.enumeration.WorkState;
+import co.com.fixitgroup.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Work;
 
@@ -15,14 +17,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * REST controller for managing Work.
@@ -82,6 +84,29 @@ public class WorkResource {
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, work.getId().toString()))
             .body(result);
     }
+
+    /**
+     * GET  /myWorks : get all the works.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of works in body
+     */
+    @GetMapping("/myWorks")
+    @Timed
+    public ResponseEntity<List<Work>> getMyWorks(@RequestParam(value = "state", required = false, defaultValue = "")  String states) {
+        Set<WorkState> validStates = new HashSet<>();
+
+        if(Objects.isNull(states) || "".equals(states)){
+            validStates.addAll(Arrays.asList(WorkState.values())); // All statues are valid
+        }else{
+            validStates = WorkState.findAll(states.split(","));
+        }
+        log.debug("REST request to get a page of Works");
+        String user = SecurityUtils.getCurrentUserLogin();
+        if(user == null){ return new ResponseEntity(HttpStatus.UNAUTHORIZED);}
+        List<Work> works = workRepository.getMyWorks(user, validStates);
+        return new ResponseEntity<>(works, HttpStatus.OK);
+    }
+
 
     /**
      * GET  /works : get all the works.

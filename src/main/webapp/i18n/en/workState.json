@@ -1,0 +1,13 @@
+{
+    "fixItApp": {
+        "WorkState" : {
+            "null": "",
+            "ORDERED": "ORDERED",
+            "SCHEDULED": "SCHEDULED",
+            "FINISHED": "FINISHED",
+            "FAILED": "FAILED",
+            "CANCELED": "CANCELED",
+            "IN_PROGRESS": "IN_PROGRESS"
+        }
+    }
+}

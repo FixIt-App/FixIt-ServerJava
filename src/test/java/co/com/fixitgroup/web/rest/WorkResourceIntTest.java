@@ -2,10 +2,19 @@ package co.com.fixitgroup.web.rest;
 
 import co.com.fixitgroup.FixItApp;
 
+import co.com.fixitgroup.domain.Customer;
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.domain.Work;
+import co.com.fixitgroup.repository.CustomerRepository;
+import co.com.fixitgroup.repository.UserRepository;
 import co.com.fixitgroup.repository.WorkRepository;
+import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.JWTConfigurer;
+import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +24,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.validation.constraints.AssertTrue;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 
 import static co.com.fixitgroup.web.rest.TestUtil.sameInstant;
@@ -33,6 +48,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import co.com.fixitgroup.domain.enumeration.WorkState;
 /**
  * Test class for the WorkResource REST controller.
  *
@@ -51,6 +67,9 @@ public class WorkResourceIntTest {
     private static final Boolean DEFAULT_ASAP = false;
     private static final Boolean UPDATED_ASAP = true;
 
+    private static final WorkState DEFAULT_STATE = WorkState.ORDERED;
+    private static final WorkState UPDATED_STATE = WorkState.SCHEDULED;
+
     @Autowired
     private WorkRepository workRepository;
 
@@ -64,7 +83,19 @@ public class WorkResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     private EntityManager em;
+
+    @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
+    private  ObjectMapper objectMapper;
 
     private MockMvc restWorkMockMvc;
 
@@ -90,7 +121,8 @@ public class WorkResourceIntTest {
         Work work = new Work()
             .time(DEFAULT_TIME)
             .description(DEFAULT_DESCRIPTION)
-            .asap(DEFAULT_ASAP);
+            .asap(DEFAULT_ASAP)
+            .state(DEFAULT_STATE);
         return work;
     }
 
@@ -117,6 +149,7 @@ public class WorkResourceIntTest {
         assertThat(testWork.getTime()).isEqualTo(DEFAULT_TIME);
         assertThat(testWork.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
         assertThat(testWork.isAsap()).isEqualTo(DEFAULT_ASAP);
+        assertThat(testWork.getState()).isEqualTo(DEFAULT_STATE);
     }
 
     @Test
@@ -194,6 +227,24 @@ public class WorkResourceIntTest {
 
     @Test
     @Transactional
+    public void checkStateIsRequired() throws Exception {
+        int databaseSizeBeforeTest = workRepository.findAll().size();
+        // set the field null
+        work.setState(null);
+
+        // Create the Work, which fails.
+
+        restWorkMockMvc.perform(post("/api/works")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(work)))
+            .andExpect(status().isCreated());
+
+        List<Work> workList = workRepository.findAll();
+        assertThat(workList).hasSize(databaseSizeBeforeTest + 1);
+    }
+
+    @Test
+    @Transactional
     public void getAllWorks() throws Exception {
         // Initialize the database
         workRepository.saveAndFlush(work);
@@ -205,7 +256,48 @@ public class WorkResourceIntTest {
             .andExpect(jsonPath("$.[*].id").value(hasItem(work.getId().intValue())))
             .andExpect(jsonPath("$.[*].time").value(hasItem(sameInstant(DEFAULT_TIME))))
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION.toString())))
-            .andExpect(jsonPath("$.[*].asap").value(hasItem(DEFAULT_ASAP.booleanValue())));
+            .andExpect(jsonPath("$.[*].asap").value(hasItem(DEFAULT_ASAP.booleanValue())))
+            .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())));
+    }
+
+    @Test
+    @Transactional
+    public void getMyWorksSucessfulTest() throws  Exception {
+        User user = UserResourceIntTest.createEntity(em);
+        Customer customer = CustomerResourceIntTest.createEntity(em);
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customer = customerRepository.saveAndFlush(customer);
+        work.setCustomer(customer);
+        work = workRepository.saveAndFlush(work);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = tokenProvider.createToken(authentication, false);
+        MvcResult result = restWorkMockMvc.perform(
+            get("/api/myWorks")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isOk())
+
+            .andReturn();
+        Work[] resultWorks = objectMapper.readValue(result.getResponse().getContentAsString(), Work[].class);
+        Assert.assertEquals(1, resultWorks.length);
+    }
+
+    @Test
+    @Transactional
+    public void getMyWorksUnAuthenticatedShouldFail() throws Exception {
+        // Initialize the database
+        workRepository.saveAndFlush(work);
+
+        // Get all the workList With no permission header
+        restWorkMockMvc.perform(get("/api/myWorks"))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -221,7 +313,8 @@ public class WorkResourceIntTest {
             .andExpect(jsonPath("$.id").value(work.getId().intValue()))
             .andExpect(jsonPath("$.time").value(sameInstant(DEFAULT_TIME)))
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION.toString()))
-            .andExpect(jsonPath("$.asap").value(DEFAULT_ASAP.booleanValue()));
+            .andExpect(jsonPath("$.asap").value(DEFAULT_ASAP.booleanValue()))
+            .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()));
     }
 
     @Test
@@ -244,7 +337,8 @@ public class WorkResourceIntTest {
         updatedWork
             .time(UPDATED_TIME)
             .description(UPDATED_DESCRIPTION)
-            .asap(UPDATED_ASAP);
+            .asap(UPDATED_ASAP)
+            .state(UPDATED_STATE);
 
         restWorkMockMvc.perform(put("/api/works")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -258,6 +352,7 @@ public class WorkResourceIntTest {
         assertThat(testWork.getTime()).isEqualTo(UPDATED_TIME);
         assertThat(testWork.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
         assertThat(testWork.isAsap()).isEqualTo(UPDATED_ASAP);
+        assertThat(testWork.getState()).isEqualTo(UPDATED_STATE);
     }
 
     @Test

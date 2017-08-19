@@ -26,10 +26,20 @@ enum PriceType {
 	STANDARIZED, NOT_STANDARIZED, UNKNOWN
 }
 
+enum WorkState {
+    ORDERED,
+    SCHEDULED,
+    FINISHED,
+    FAILED,
+    CANCELED,
+    IN_PROGRESS
+}
+
 entity Work {
     time ZonedDateTime required,
     description String required,
-    asap Boolean required
+    asap Boolean required,
+    state WorkState required
 }
 
 entity WorkType {
