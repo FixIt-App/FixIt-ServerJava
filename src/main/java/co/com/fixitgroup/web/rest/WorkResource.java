@@ -1,5 +1,6 @@
 package co.com.fixitgroup.web.rest;
 
+import co.com.fixitgroup.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import co.com.fixitgroup.domain.Work;
 
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -82,6 +84,22 @@ public class WorkResource {
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, work.getId().toString()))
             .body(result);
     }
+
+    /**
+     * GET  /myWorks : get all the works.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of works in body
+     */
+    @GetMapping("/myWorks")
+    @Timed
+    public ResponseEntity<List<Work>> getMyWorks() {
+        log.debug("REST request to get a page of Works");
+        String user = SecurityUtils.getCurrentUserLogin();
+        if(user == null){ return new ResponseEntity(HttpStatus.UNAUTHORIZED);}
+        List<Work> works = workRepository.getMyWorks(user);
+        return new ResponseEntity<>(works, HttpStatus.OK);
+    }
+
 
     /**
      * GET  /works : get all the works.

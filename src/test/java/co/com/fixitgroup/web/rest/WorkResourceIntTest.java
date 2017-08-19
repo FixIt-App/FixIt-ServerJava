@@ -2,10 +2,19 @@ package co.com.fixitgroup.web.rest;
 
 import co.com.fixitgroup.FixItApp;
 
+import co.com.fixitgroup.domain.Customer;
+import co.com.fixitgroup.domain.User;
 import co.com.fixitgroup.domain.Work;
+import co.com.fixitgroup.repository.CustomerRepository;
+import co.com.fixitgroup.repository.UserRepository;
 import co.com.fixitgroup.repository.WorkRepository;
+import co.com.fixitgroup.security.AuthoritiesConstants;
+import co.com.fixitgroup.security.jwt.JWTConfigurer;
+import co.com.fixitgroup.security.jwt.TokenProvider;
 import co.com.fixitgroup.web.rest.errors.ExceptionTranslator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +24,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.validation.constraints.AssertTrue;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 
 import static co.com.fixitgroup.web.rest.TestUtil.sameInstant;
@@ -64,7 +79,19 @@ public class WorkResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     private EntityManager em;
+
+    @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
+    private  ObjectMapper objectMapper;
 
     private MockMvc restWorkMockMvc;
 
@@ -206,6 +233,46 @@ public class WorkResourceIntTest {
             .andExpect(jsonPath("$.[*].time").value(hasItem(sameInstant(DEFAULT_TIME))))
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION.toString())))
             .andExpect(jsonPath("$.[*].asap").value(hasItem(DEFAULT_ASAP.booleanValue())));
+    }
+
+    @Test
+    @Transactional
+    public void getMyWorksSucessfulTest() throws  Exception {
+        User user = UserResourceIntTest.createEntity(em);
+        Customer customer = CustomerResourceIntTest.createEntity(em);
+        user = userRepository.saveAndFlush(user);
+        customer.setUser(user);
+        customer = customerRepository.saveAndFlush(customer);
+        work.setCustomer(customer);
+        work = workRepository.saveAndFlush(work);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            user.getLogin(), user.getPassword(),
+            Collections.singletonList(new SimpleGrantedAuthority(AuthoritiesConstants.USER))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = tokenProvider.createToken(authentication, false);
+        MvcResult result = restWorkMockMvc.perform(
+            get("/api/myWorks")
+                .contentType(TestUtil.APPLICATION_JSON_UTF8)
+                .header(JWTConfigurer.AUTHORIZATION_HEADER, "Bearer ".concat(jwt)))
+            .andExpect(status().isOk())
+
+            .andReturn();
+        Work[] resultWorks = objectMapper.readValue(result.getResponse().getContentAsString(), Work[].class);
+        Assert.assertEquals(1, resultWorks.length);
+    }
+
+    @Test
+    @Transactional
+    public void getMyWorksUnAuthenticatedShouldFail() throws Exception {
+        // Initialize the database
+        workRepository.saveAndFlush(work);
+
+        // Get all the workList With no permission header
+        restWorkMockMvc.perform(get("/api/myWorks"))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
